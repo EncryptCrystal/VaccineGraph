@@ -142,9 +142,9 @@ def Importation(nom_fichier):
     plt.plot(liste_dates, projectionObjectif(injections_completes_18_ans), "darkgreen", label = f"Objectif des +18 ans vaccinés ({int(obj_18_ans_tot_dose*100)} %)")
     
     #Trace une zone en gris clair entourée de ligne verticales en pointillé pour désigner les prédictions des courbes
-    plt.axvline(x=date_limite,color='gray',linestyle='--')
+    plt.axvline(x=date_limite, color='gray', linestyle='--')
     plt.axvspan(date_limite, liste_dates[-1], alpha=0.5, color='lightgray')
-    plt.axvline(x=liste_dates[-1],color='gray',linestyle='--')
+    plt.axvline(x=liste_dates[-1], color='gray', linestyle='--')
     
     #Limite l'axe y à maximum 110% et force la création de jalons de 10%
     plt.yticks(np.arange(0, 110, 10))
