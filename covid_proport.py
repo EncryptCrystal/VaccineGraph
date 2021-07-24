@@ -17,15 +17,16 @@ from operator import  itemgetter
 import matplotlib.pyplot as plt
 import numpy as np
 
-#Fonction à usage répété
+
+#Sert à formater les dates : "AAAA-MM-JJ" -> "JJ MMM"
 def format_date(date):
-    date = date.rsplit("-")
-    new_date = date[2]
+    date = date.rsplit("-")                                             #Sépare la chaine en 1 liste de 3 éléments : [AAAA, MM, JJ]
+    new_date = date[2]                                                  #Prend la valeur des jours
     if date[1] == "01": new_date += " Jan"
     elif date[1] == "02": new_date += " Fev"
     elif date[1] == "03": new_date += " Mar"
     elif date[1] == "04": new_date += " Avr"
-    elif date[1] == "05": new_date += " Mai"
+    elif date[1] == "05": new_date += " Mai"                            #En fonction de la valeur de MM (nombre), on rajoute rajoute la valeur MMM (lettres) correspondante
     elif date[1] == "06": new_date += " Jun"
     elif date[1] == "07": new_date += " Jul"
     elif date[1] == "08": new_date += " Aou"
@@ -37,26 +38,28 @@ def format_date(date):
 
 
 def Importation(nom_fichier):
-    fichier = open(nom_fichier,"r")
+    fichier = open(nom_fichier,"r")                                     #Ouvre le fichier
     ligne_descripteurs = fichier.readline()
-    lst_descripteurs = ligne_descripteurs.rstrip().rsplit(";")
-    lignes = fichier.readlines()
+    lst_descripteurs = ligne_descripteurs.rstrip().rsplit(";")          #Sépare la première ligne (titres des colonnes) du reste des valeurs numériques
+    lignes = fichier.readlines()                                        #Le reste est entreposée dans "lignes"
     table = []
     for ligne in lignes:
         lst = ligne.rstrip().split(";")
-        del lst[0]
-        lst[0] = int(lst[0])
-        del lst[2]
-        del lst[2]
-        lst[2] = int(lst[2])
-        lst[3] = int(lst[3])
-        del lst[4]
-        del lst[4]
-        lst[0], lst[1] = lst[1], lst[0]
+        del lst[0]                                                      #Supression des valeurs du pays de l'injection (toutes dans le fichier sont en France)
+        lst[0] = int(lst[0])                                            #Conversion de l'âge des vaccinés en nombre entier (de base une chaine de caractères.)
+        del lst[2]                                                      #Suppression des primo injections quotidiennes
+        del lst[2]                                                      #Suppression des injections completes quotidiennes
+        lst[2] = int(lst[2])                                            #Conversion du cumul des primo injections en nombre entier
+        lst[3] = int(lst[3])                                            #Conversion du cumul des injections complètes en nombre entier
+        del lst[4]                                                      #Suppression du taux de primo vaccinés
+        del lst[4]                                                      #Suppression du taux de vaccinés
+        lst[0], lst[1] = lst[1], lst[0]                                 #Inversion de la place des valeurs de la date et de l'âge
         table.append(lst)
-    fichier.close()
-    table = sorted(table, key=itemgetter(0, 1))
+    fichier.close()                                                     #Ferme le fichier
+    table = sorted(table, key=itemgetter(0, 1))                         #Tri les données par date, puis par âge
     
+
+    #Initialisation des variables des dates et des 5 autres courbes
     liste_dates = []
     
     primo_injections_18_ans = []
@@ -64,7 +67,7 @@ def Importation(nom_fichier):
     primo_injections_totales = []
     injections_completes_18_ans = []
     injections_completes_totales = []
-          
+    
     cumul_primo_injections_18_ans = 0
     cumul_injections_completes_18_ans = 0
     cumul_primo_injections_50_ans = 0
@@ -76,7 +79,7 @@ def Importation(nom_fichier):
         primo_injections = donnes[2]
         injections_completes = donnes[3]
 
-    
+
         if age == 0:
             primo_injections_totales.append(primo_injections/obj_1_dose*100)
             injections_completes_totales.append(injections_completes/obj_tot_dose*100)
