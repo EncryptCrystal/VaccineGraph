@@ -1,18 +1,15 @@
-#Objectif du nombre de doses
-obj_1_dose = 50000000
-obj_tot_dose = 35000000
+#Liste des objectifs
+obj_1_dose = 50000000                                                   #50 000 000 de primo-vaccinés
+obj_tot_dose = 35000000                                                 #35 000 000 de vaccinés
+obj_50_ans_1_dose = 0.85                                                #85% des +50 ans primo-vaccinés
+obj_18_ans_1_dose = 0.75                                                #75% des +18 ans primo-vaccinés
+obj_18_ans_tot_dose = 0.66                                              #66% des +18 ans complétement vaccinés
 
-#Objectif de proportion de primo-vaccinés de plus de 50 ans
-obj_50_ans_1_dose = 0.85
-
-#Objectif de proportion primo-vaccinés et vaccinés de plus de 18 ans
-obj_18_ans_1_dose = 0.75
-obj_18_ans_tot_dose = 0.66
-
-#Population française de plus de 50 ans et 18 ans
+#Données sur la population
 pop_50_ans = 26700000
 pop_18_ans = 26000000 + pop_50_ans
 
+#Imporations de divers modules
 from operator import itemgetter
 import matplotlib.pyplot as plt
 import numpy as np
@@ -47,11 +44,11 @@ def Importation(nom_fichier):
         lst = ligne.rstrip().split(";")
         del lst[0]                                                      #Supression des valeurs du pays de l'injection (toutes dans le fichier sont en France)
         lst[0] = int(lst[0])                                            #Conversion de l'âge des vaccinés en nombre entier (de base une chaine de caractères.)
-        del lst[2]                                                      #Suppression des primo injections quotidiennes
-        del lst[2]                                                      #Suppression des injections completes quotidiennes
-        lst[2] = int(lst[2])                                            #Conversion du cumul des primo injections en nombre entier
+        del lst[2]                                                      #Suppression des primo-injections quotidiennes
+        del lst[2]                                                      #Suppression des injections complètes quotidiennes
+        lst[2] = int(lst[2])                                            #Conversion du cumul des primo-injections en nombre entier
         lst[3] = int(lst[3])                                            #Conversion du cumul des injections complètes en nombre entier
-        del lst[4]                                                      #Suppression du taux de primo vaccinés
+        del lst[4]                                                      #Suppression du taux de primo-vaccinés
         del lst[4]                                                      #Suppression du taux de vaccinés
         lst[0], lst[1] = lst[1], lst[0]                                 #Inversion de la place des valeurs de la date et de l'âge
         table.append(lst)
@@ -79,24 +76,24 @@ def Importation(nom_fichier):
         primo_injections = donnes[2]
         injections_completes = donnes[3]
 
-        #Dans le cas où la ligne conserne les injections tout âge confondus...
+        #Dans le cas où la ligne concerne les injections tout âge confondu...
         if age == 0:
             primo_injections_totales.append(primo_injections/obj_1_dose*100)
             injections_completes_totales.append(injections_completes/obj_tot_dose*100)
             liste_dates.append(format_date(date))
 
-        #Dans le cas où la ligne conserne les injections de personnes entre 18 et 49 ans...
+        #Dans le cas où la ligne concerne les injections de personnes entre 18 et 49 ans...
         elif 18 <= age <= 49:
             cumul_primo_injections_18_ans += primo_injections
             cumul_injections_completes_18_ans += injections_completes
 
-        #Dans le cas où la ligne conserne les injections de personnes entre 50 et 79 ans...
+        #Dans le cas où la ligne concerne les injections de personnes entre 50 et 79 ans...
         elif 50 <= age <= 79:
             cumul_primo_injections_50_ans += primo_injections
             cumul_primo_injections_18_ans += primo_injections
             cumul_injections_completes_18_ans += injections_completes
 
-        #Dans le cas où la ligne conserne les injections de personnes de plus de 80 ans...
+        #Dans le cas où la ligne concerne les injections de personnes de plus de 80 ans...
         elif age == 80:
             cumul_primo_injections_50_ans += primo_injections
             primo_injections_50_ans.append(cumul_primo_injections_50_ans/pop_50_ans/obj_50_ans_1_dose*100)
@@ -166,4 +163,4 @@ def Importation(nom_fichier):
     plt.show()
 
 
-Importation("vacsi-a-fra-2021-07-23-19h05.csv")
+Importation("vacsi-a-fra-2021-07-23-19h05.csv")                         #Execution du code
