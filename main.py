@@ -24,8 +24,8 @@ def format_date(date):
     elif date[1] == "03": new_date += " Mar"
     elif date[1] == "04": new_date += " Avr"
     elif date[1] == "05": new_date += " Mai"                            #En fonction de la valeur de MM (nombre),on rajoute la valeur MMM (lettres) correspondante
-    elif date[1] == "06": new_date += " Jun"
-    elif date[1] == "07": new_date += " Jul"
+    elif date[1] == "06": new_date += " Juin"
+    elif date[1] == "07": new_date += " Juill"
     elif date[1] == "08": new_date += " Aou"
     elif date[1] == "09": new_date += " Sep"
     elif date[1] == "10": new_date += " Oct"
@@ -108,8 +108,8 @@ def Importation(nom_fichier):
     
     #Sert à la création des dates ultérieurs à celles des données
     date_limite = str(liste_dates[-1])
-    while liste_dates[-1][0:2] != "31" and liste_dates[-1][3:7] == "Jul":
-        liste_dates.append(str(int(liste_dates[-1][0:2])+1)+" Jul")
+    while liste_dates[-1][0:2] != "31" and liste_dates[-1][3:9] == "Juill":
+        liste_dates.append(str(int(liste_dates[-1][0:3])+1)+" Juill")
             
     if "01 Aou" not in liste_dates: liste_dates.append("01 Aou")
         
