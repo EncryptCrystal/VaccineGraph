@@ -13,7 +13,7 @@ obj_18_ans_tot_dose = 0.66
 pop_50_ans = 26700000
 pop_18_ans = 26000000 + pop_50_ans
 
-from operator import  itemgetter
+from operator import itemgetter
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -122,7 +122,7 @@ def Importation(nom_fichier):
     while liste_dates[-1][0:2] != "31" and liste_dates[-1][3:6] == "Aou":
         liste_dates.append(str(int(liste_dates[-1][0:2])+1)+" Aou")
     
-    
+
     #Sert à la projection des courbes
     def projectionObjectif(fonction):
         projection = list(fonction)
