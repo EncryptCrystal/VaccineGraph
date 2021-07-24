@@ -1,13 +1,13 @@
 #Liste des objectifs
-obj_1_dose = 50000000                                                   #50 000 000 de primo-vaccinés
-obj_tot_dose = 35000000                                                 #35 000 000 de vaccinés
+obj_1_dose = 50000000                                                   #50 000 000 primo-vaccinés
+obj_tot_dose = 35000000                                                 #35 000 000 vaccinés
 obj_50_ans_1_dose = 0.85                                                #85% des +50 ans primo-vaccinés
 obj_18_ans_1_dose = 0.75                                                #75% des +18 ans primo-vaccinés
 obj_18_ans_tot_dose = 0.66                                              #66% des +18 ans complétement vaccinés
 
-#Données sur la population
-pop_50_ans = 26700000
-pop_18_ans = 26000000 + pop_50_ans
+#Données sur la population (Insee, 2021) (https://www.insee.fr/fr/outil-interactif/5367857/details/20_DEM/21_POP/21C_Figure3#)
+pop_50_ans = 27824662                                                   #27 824 662 Français ont plus de 50 ans
+pop_18_ans = 53761464                                                   #53 761 464 Français ont plus de 18 ans
 
 #Imporations de divers modules
 from operator import itemgetter
