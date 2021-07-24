@@ -71,37 +71,37 @@ def Importation(nom_fichier):
     
     for donnes in table:
       
-      date = donnes[0]
-      age = donnes[1]
-      primo_injections = donnes[2]
-      injections_completes = donnes[3]
+        date = donnes[0]
+        age = donnes[1]
+        primo_injections = donnes[2]
+        injections_completes = donnes[3]
 
     
-      if age == 0:
-        primo_injections_totales.append(primo_injections/obj_1_dose*100)
-        injections_completes_totales.append(injections_completes/obj_tot_dose*100)
-        liste_dates.append(format_date(date))
+        if age == 0:
+            primo_injections_totales.append(primo_injections/obj_1_dose*100)
+            injections_completes_totales.append(injections_completes/obj_tot_dose*100)
+            liste_dates.append(format_date(date))
       
-      elif 18 <= age <= 49:
-        cumul_primo_injections_18_ans += primo_injections
-        cumul_injections_completes_18_ans += injections_completes
+        elif 18 <= age <= 49:
+            cumul_primo_injections_18_ans += primo_injections
+            cumul_injections_completes_18_ans += injections_completes
       
-      elif 50 <= age <= 79:
-        cumul_primo_injections_50_ans += primo_injections
-        cumul_primo_injections_18_ans += primo_injections
-        cumul_injections_completes_18_ans += injections_completes
+        elif 50 <= age <= 79:
+            cumul_primo_injections_50_ans += primo_injections
+            cumul_primo_injections_18_ans += primo_injections
+            cumul_injections_completes_18_ans += injections_completes
       
-      elif age == 80:
-        cumul_primo_injections_50_ans += primo_injections
-        primo_injections_50_ans.append(cumul_primo_injections_50_ans/pop_50_ans/obj_50_ans_1_dose*100)
-        cumul_primo_injections_50_ans = 0
+        elif age == 80:
+            cumul_primo_injections_50_ans += primo_injections
+            primo_injections_50_ans.append(cumul_primo_injections_50_ans/pop_50_ans/obj_50_ans_1_dose*100)
+            cumul_primo_injections_50_ans = 0
         
-        cumul_primo_injections_18_ans += primo_injections
-        cumul_injections_completes_18_ans += injections_completes
-        primo_injections_18_ans.append(cumul_primo_injections_18_ans/pop_18_ans/obj_18_ans_1_dose*100)
-        injections_completes_18_ans.append(cumul_injections_completes_18_ans/pop_18_ans/obj_18_ans_tot_dose*100)
-        cumul_primo_injections_18_ans = 0
-        cumul_injections_completes_18_ans = 0
+            cumul_primo_injections_18_ans += primo_injections
+            cumul_injections_completes_18_ans += injections_completes
+            primo_injections_18_ans.append(cumul_primo_injections_18_ans/pop_18_ans/obj_18_ans_1_dose*100)
+            injections_completes_18_ans.append(cumul_injections_completes_18_ans/pop_18_ans/obj_18_ans_tot_dose*100)
+            cumul_primo_injections_18_ans = 0
+            cumul_injections_completes_18_ans = 0
         
     date_limite = str(liste_dates[-1])
     while liste_dates[-1][0:2] != "31" and liste_dates[-1][3:7] == "Juil":
