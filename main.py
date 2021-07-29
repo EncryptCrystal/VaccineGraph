@@ -16,7 +16,7 @@ pop_50_ans = 27824662                                                   #27 824 
 pop_18_ans = 53761464                                                   #53 761 464 Français ont plus de 18 ans
 
 nom_fichier = "vacsi-a-fra-2021-07-29-19h05.csv"                        #Nom du fichier de données à traiter
-limite_jour = 0                                                         #Indique le nombre de dates à inscrire sur l'axe des abscisses (0 ou 1 conserve la liste)
+limite_jour = 30                                                         #Indique le nombre de dates à inscrire sur l'axe des abscisses (0 ou 1 conserve la liste)
 
 
 #Sert à limiter une liste à nb_element de manière uniforme
@@ -73,10 +73,9 @@ for ligne in lignes:
     lst[3] = int(lst[3])                                                #Conversion du cumul des injections complètes en nombre entier
     del lst[4]                                                          #Suppression du taux de primo-vaccinés
     del lst[4]                                                          #Suppression du taux de vaccinés
-    lst[0], lst[1] = lst[1], lst[0]                                     #Inversion de la place des valeurs de la date et de l'âge
     table.append(lst)
 fichier.close()                                                         #Ferme le fichier
-table = sorted(table, key=itemgetter(0, 1))                             #Tri les données par date, puis par âge
+table = sorted(table, key=itemgetter(1, 0))                             #Tri les données par date, puis par âge
 
 
 #Initialisation des variables des dates et des 5 autres courbes
@@ -94,8 +93,8 @@ cumul_primo_injections_50_ans = 0
     
 for donnes in table:
     #Afin de faciliter la compréhension du code, les 4 colonnes sont assignés à des variables
-    date = donnes[0]
-    age = donnes[1]
+    age = donnes[0]
+    date = donnes[1]
     primo_injections = donnes[2]
     injections_completes = donnes[3]
 
@@ -147,7 +146,7 @@ liste_dates_reduite = reduction(liste_dates)                            #Reduit 
 
 
 #Début de la contruction du graphique
-plt.figure(figsize=(45,8))                                              #Définit une dimension en 45/9 à cause de la grande quantité de dates
+plt.figure(figsize=(25,8))                                              #Définit une dimension en 45/9 à cause de la grande quantité de dates
 plt.tick_params(axis = 'x', rotation = 80)                              #Tourne les dates à 80° afin qu'elles restent visibles
     
 plt.axhline(y=100,color='gray',linestyle='--')                          #Trace une ligne de pointillé verticale au niveau des 100%
