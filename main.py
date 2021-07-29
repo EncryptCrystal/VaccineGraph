@@ -146,7 +146,7 @@ liste_dates_reduite = reduction(liste_dates)                            #Reduit 
 
 
 #Début de la contruction du graphique
-plt.figure(figsize=(25,8))                                              #Définit une dimension en 45/9 à cause de la grande quantité de dates
+plt.figure(figsize=(45,8))                                              #Définit une dimension en 45/9 à cause de la grande quantité de dates
 plt.tick_params(axis = 'x', rotation = 80)                              #Tourne les dates à 80° afin qu'elles restent visibles
     
 plt.axhline(y=100,color='gray',linestyle='--')                          #Trace une ligne de pointillé verticale au niveau des 100%
