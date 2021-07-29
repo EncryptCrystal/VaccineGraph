@@ -16,7 +16,7 @@ pop_50_ans = 27824662                                                   #27 824 
 pop_18_ans = 53761464                                                   #53 761 464 Français ont plus de 18 ans
 
 nom_fichier = "vacsi-a-fra-2021-07-29-19h05.csv"                        #Nom du fichier de données à traiter
-limite_jour = 30                                                         #Indique le nombre de dates à inscrire sur l'axe des abscisses (0 ou 1 conserve la liste)
+limite_jour = 0                                                         #Indique le nombre de dates à inscrire sur l'axe des abscisses (0 ou 1 conserve la liste)
 
 
 #Sert à limiter une liste à nb_element de manière uniforme
