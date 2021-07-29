@@ -21,9 +21,9 @@ limite_jour = 0                                                         #Indique
 
 #Sert à limiter une liste à nb_element de manière uniforme
 def reduction(liste):
-    if limite_jour == 0 or limite_jour == 1: return liste                 #nb_element ne doit pas être égal à 0 ou 1
+    if limite_jour == 0 or limite_jour == 1: return liste               #nb_element ne doit pas être égal à 0 ou 1
     liste_compressee = []
-    coeff = len(liste)/(limite_jour-1)                                   #Calcule l'écart idéal entre 2 éléments de la liste à compresser (prends en compte le premier et dernier élément)
+    coeff = len(liste)/(limite_jour-1)                                  #Calcule l'écart idéal entre 2 éléments de la liste à compresser (prends en compte le premier et dernier élément)
     liste_compressee.append(liste[0])                                   #Ajoute le premier élement de la liste à compresser
     for i in range(len(liste)):
         if int(i/coeff) == len(liste_compressee):                       #Si la position de l'élément est supérieure ou égale à sa position dans la liste compressée
