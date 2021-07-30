@@ -15,7 +15,7 @@ obj_18_ans_tot_dose = 0.66                                              #66% des
 pop_50_ans = 27824662                                                   #27 824 662 Français ont plus de 50 ans
 pop_18_ans = 53761464                                                   #53 761 464 Français ont plus de 18 ans
 
-nom_fichier = "vacsi-a-fra-2021-07-29-19h05.csv"                        #Nom du fichier de données à traiter
+nom_fichier = "vacsi-a-fra-2021-07-30-19h09.csv"                        #Nom du fichier de données à traiter
 limite_jour = 0                                                         #Indique le nombre de dates à inscrire sur l'axe des abscisses (0 ou 1 conserve la liste)
 
 
