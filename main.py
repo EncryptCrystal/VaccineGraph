@@ -71,8 +71,8 @@ for ligne in lignes:
     del lst[2]                                                          #Suppression des injections complètes quotidiennes
     lst[2] = int(lst[2])                                                #Conversion du cumul des primo-injections en nombre entier
     lst[3] = int(lst[3])                                                #Conversion du cumul des injections complètes en nombre entier
-    del lst[4]                                                          #Suppression du taux de primo-vaccinés
-    del lst[4]                                                          #Suppression du taux de vaccinés
+    lst[4] = float(lst[4])                                              #Conversion du taux de primo-vaccinés en nombre entier
+    lst[5] = float(lst[5])                                              #Conversion du taux de vaccinés en nombre entier
     table.append(lst)
 fichier.close()                                                         #Ferme le fichier
 table = sorted(table, key=itemgetter(1, 0))                             #Tri les données par date, puis par âge
@@ -80,7 +80,9 @@ table = sorted(table, key=itemgetter(1, 0))                             #Tri les
 
 #Initialisation des variables des dates et des 5 autres courbes
 liste_dates = []
-    
+
+proportion_primo_vaccines = []
+proportion_vaccines = []
 primo_injections_18_ans = []
 primo_injections_50_ans = []
 primo_injections_totales = []
@@ -91,18 +93,22 @@ cumul_primo_injections_18_ans = 0
 cumul_injections_completes_18_ans = 0
 cumul_primo_injections_50_ans = 0
     
-for donnes in table:
+for donnees in table:
     #Afin de faciliter la compréhension du code, les 4 colonnes sont assignés à des variables
-    age = donnes[0]
-    date = donnes[1]
-    primo_injections = donnes[2]
-    injections_completes = donnes[3]
+    age = donnees[0]
+    date = donnees[1]
+    primo_injections = donnees[2]
+    injections_completes = donnees[3]
+    taux_primo_vaccines = donnees[4]
+    taux_vaccines = donnees[5]
 
     #Dans le cas où la ligne concerne les injections tout âge confondu...
     if age == 0:
         primo_injections_totales.append(primo_injections/obj_1_dose*100)
         injections_completes_totales.append(injections_completes/obj_tot_dose*100)
         liste_dates.append(format_date(date))
+        proportion_primo_vaccines.append(taux_primo_vaccines)
+        proportion_vaccines.append(taux_vaccines)
 
     #Dans le cas où la ligne concerne les injections de personnes entre 18 et 49 ans...
     elif 18 <= age <= 49:
