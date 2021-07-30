@@ -71,8 +71,8 @@ for ligne in lignes:
     del lst[2]                                                          #Suppression des injections complètes quotidiennes
     lst[2] = int(lst[2])                                                #Conversion du cumul des primo-injections en nombre entier
     lst[3] = int(lst[3])                                                #Conversion du cumul des injections complètes en nombre entier
-    del lst[4]                                                          #Suppression du taux de primo-vaccinés
-    del lst[4]                                                          #Suppression du taux de vaccinés
+    lst[4] = float(lst[4])                                              #Conversion du taux de primo-vaccinés en nombre entier
+    lst[5] = float(lst[5])                                              #Conversion du taux de vaccinés en nombre entier
     table.append(lst)
 fichier.close()                                                         #Ferme le fichier
 table = sorted(table, key=itemgetter(1, 0))                             #Tri les données par date, puis par âge
@@ -80,29 +80,35 @@ table = sorted(table, key=itemgetter(1, 0))                             #Tri les
 
 #Initialisation des variables des dates et des 5 autres courbes
 liste_dates = []
-    
+
 primo_injections_18_ans = []
 primo_injections_50_ans = []
 primo_injections_totales = []
 injections_completes_18_ans = []
 injections_completes_totales = []
+proportion_primo_vaccines = []
+proportion_vaccines = []
     
 cumul_primo_injections_18_ans = 0
 cumul_injections_completes_18_ans = 0
 cumul_primo_injections_50_ans = 0
     
-for donnes in table:
+for donnees in table:
     #Afin de faciliter la compréhension du code, les 4 colonnes sont assignés à des variables
-    age = donnes[0]
-    date = donnes[1]
-    primo_injections = donnes[2]
-    injections_completes = donnes[3]
+    age = donnees[0]
+    date = donnees[1]
+    primo_injections = donnees[2]
+    injections_completes = donnees[3]
+    taux_primo_vaccines = donnees[4]
+    taux_vaccines = donnees[5]
 
     #Dans le cas où la ligne concerne les injections tout âge confondu...
     if age == 0:
         primo_injections_totales.append(primo_injections/obj_1_dose*100)
         injections_completes_totales.append(injections_completes/obj_tot_dose*100)
         liste_dates.append(format_date(date))
+        proportion_primo_vaccines.append(taux_primo_vaccines)
+        proportion_vaccines.append(taux_vaccines)
 
     #Dans le cas où la ligne concerne les injections de personnes entre 18 et 49 ans...
     elif 18 <= age <= 49:
@@ -152,12 +158,14 @@ plt.tick_params(axis = 'x', rotation = 80)                              #Tourne 
 plt.axhline(y=100,color='gray',linestyle='--')                          #Trace une ligne de pointillé verticale au niveau des 100%
 
 #Trace les courbes
-plt.plot(reduction(liste_dates_reduite), reduction(projectionObjectif(primo_injections_totales)), "red", label = f"Objectif de primo-vaccinés ({int(obj_1_dose/1000000)} M)")
-plt.plot(reduction(liste_dates_reduite), reduction(projectionObjectif(injections_completes_totales)), "firebrick", label = f"Objectif de vaccinés ({int(obj_tot_dose/1000000)} M)")
-plt.plot(reduction(liste_dates_reduite), reduction(projectionObjectif(primo_injections_50_ans)), "orange", label = f"Objectif des +50 ans primo-vaccinés ({int(obj_50_ans_1_dose*100)} %)")
-plt.plot(reduction(liste_dates_reduite), reduction(projectionObjectif(primo_injections_18_ans)), "lawngreen", label = f"Objectif des +18 ans primo-vaccinés ({int(obj_18_ans_1_dose*100)} %)")
-plt.plot(reduction(liste_dates_reduite), reduction(projectionObjectif(injections_completes_18_ans)), "darkgreen", label = f"Objectif des +18 ans vaccinés ({int(obj_18_ans_tot_dose*100)} %)")
-    
+plt.plot(liste_dates_reduite, reduction(projectionObjectif(primo_injections_totales)), "red", label = f"Objectif de primo-vaccinés ({int(obj_1_dose/1000000)} M)")
+plt.plot(liste_dates_reduite, reduction(projectionObjectif(injections_completes_totales)), "firebrick", label = f"Objectif de vaccinés ({int(obj_tot_dose/1000000)} M)")
+plt.plot(liste_dates_reduite, reduction(projectionObjectif(primo_injections_50_ans)), "orange", label = f"Objectif des +50 ans primo-vaccinés ({int(obj_50_ans_1_dose*100)}%)")
+plt.plot(liste_dates_reduite, reduction(projectionObjectif(primo_injections_18_ans)), "lawngreen", label = f"Objectif des +18 ans primo-vaccinés ({int(obj_18_ans_1_dose*100)}%)")
+plt.plot(liste_dates_reduite, reduction(projectionObjectif(injections_completes_18_ans)), "darkgreen", label = f"Objectif des +18 ans vaccinés ({int(obj_18_ans_tot_dose*100)}%)")
+plt.plot(liste_dates_reduite, reduction(projectionObjectif(proportion_primo_vaccines)), "cyan", label = "Référence : Français 100% primo-vaccinés")
+plt.plot(liste_dates_reduite, reduction(projectionObjectif(proportion_vaccines)), "darkblue", label = "Référence : Français 100% vaccinés")
+
 #Trace une zone en gris clair entourée de ligne verticales en pointillé pour désigner les prédictions des courbes
 plt.axvline(x=date_limite, color='gray', linestyle='--')
 plt.axvspan(date_limite, liste_dates[-1], alpha=0.5, color='lightgray')
@@ -168,13 +176,13 @@ plt.yticks(np.arange(0, 110, 10))
 plt.ylim(0, 110)
     
 plt.legend()                                                            #Affiche les légendes associés à la courbe correspondante
-plt.margins(0, 0)                                                       #Force la disparition des marge intérieures
+plt.margins(0, 0)                                                       #Force la disparition des marges intérieures
     
 #Défini les titres du graphes et des axes x et y
-plt.title(f"Etat des objectifs gouvernementaux pour la fin aout (Données du {format_date(nom_fichier[12:22])})")
+plt.title(f"État des objectifs gouvernementaux pour la fin aout (Données du {format_date(nom_fichier[12:22])})")
 plt.xlabel("Dates")
 plt.ylabel("Pourcentage atteint des objectifs (%)")
     
-#Sauvegarde l'image suivant la date des données en 170 pouces de diagonale, et supprimes et les marges exterieures
+#Sauvegarde l'image suivant la date des données en 170 pouces de diagonale, et supprime et les marges exterieures
 plt.savefig(f"Tableau {date}.png", dpi=170, bbox_inches='tight')
 plt.show()
