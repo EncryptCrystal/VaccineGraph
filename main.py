@@ -174,7 +174,8 @@ plt.axvline(x=liste_dates[-1], color='gray', linestyle='--')
 #Limite l'axe y à maximum 110% et force la création de jalons de 10%
 plt.yticks(np.arange(0, 110, 10))
 plt.ylim(0, 110)
-    
+
+plt.grid()                                                              #Ajout d'un grillage
 plt.legend()                                                            #Affiche les légendes associés à la courbe correspondante
 plt.margins(0, 0)                                                       #Force la disparition des marges intérieures
     
