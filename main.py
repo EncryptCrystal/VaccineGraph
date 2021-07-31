@@ -6,7 +6,7 @@ import numpy as np
 
 nom_fichier = "vacsi-a-fra-2021-07-29-19h05.csv"                                #Nom du fichier de données à traiter
 limite_date_debut = "2021-06-01"                                                #Indique à partir de quelle date commence l'origine des données en format AAAA-MM-JJ (0 pour lever limite)
-limite_jour = 2                                                                 #Indique le nombre de dates à inscrire sur l'axe des abscisses (0 ou 1 conserve la liste)
+limite_jour = 0                                                                 #Indique le nombre de dates à inscrire sur l'axe des abscisses (0 ou 1 conserve la liste)
 
 
 #Liste des objectifs
@@ -82,7 +82,6 @@ for ligne in lignes:
     table.append(lst)
 fichier.close()                                                                 #Ferme le fichier
 table = sorted(table, key=itemgetter(1, 0))                                     #Tri les données par date, puis par âge
-print(table[0][1])
 
 while suppressionDate and table[0][1] != limite_date_debut: del table[0]        #Tant que la date limite n'est pas atteinte, continuer de supprimer les données
 
