@@ -54,7 +54,7 @@ def formatDate(date):
 #Sert à la projection des courbes
 def projectionObjectif(fonction):
     projection = list(fonction)
-    coeff =  (fonction[-1]-fonction[-8])/7                                      #Evolution de la courbe calculé à partir des 7 derniers jours
+    coeff =  (fonction[-1]-fonction[-8])/7                                      #Évolution de la courbe calculé à partir des 7 derniers jours
     while len(liste_dates) != len(projection):
         projection.append(projection[-1]+coeff)
     return projection
@@ -92,7 +92,7 @@ table = sorted(table, key=itemgetter(1, 0))                                     
 
 while suppressionDate and table[0][1] != limite_date_debut: del table[0]        #Tant que la date limite n'est pas atteinte, continuer de supprimer les données
 
-#Initialisation des variables des dates et des 5 autres courbes
+#Initialisation des variables des dates et des 7 autres courbes
 liste_dates = []
 
 primo_injections_18_ans = []
@@ -148,7 +148,7 @@ for donnees in table:
         cumul_primo_injections_18_ans = 0
         cumul_injections_completes_18_ans = 0
 
-position_date_limite = len(liste_dates)-1                                       #Sauvegarde de la dernière date des données
+position_date_limite = len(liste_dates)-1                                       #Sauvegarde de la position du dernier jour dont on a les données
 
 #Sert à la création des dates ultérieurs à celles des données
 while liste_dates[-1][0:2] != "31" and liste_dates[-1][3:9] == "Juill":
