@@ -178,7 +178,7 @@ liste_dates_reduite = ecartDate(reduction(liste_dates))                         
 
 
 #Début de la contruction du graphique
-plt.figure(figsize = (16, 9))                                                      #Définit une dimension en 16/9
+plt.figure(figsize = (16, 9))                                                   #Définit une dimension en 16/9
 plt.tick_params(axis = 'x', rotation = 80)                                      #Tourne les dates à 80° afin qu'elles restent visibles
 plt.axhline(y=100,color='gray',linestyle='--')                                  #Trace une ligne de pointillé verticale au niveau des 100%
 
@@ -209,4 +209,4 @@ plt.title(f"État des objectifs gouvernementaux pour la fin août (Données du {
 plt.xlabel("Dates")
 plt.ylabel("Pourcentage atteint des objectifs (%)")
     
-plt.savefig(f"Tableau {date}.png", bbox_inches = 'tight')                         #Sauvegarde l'image avec la date des données et supprime et les marges exterieures
+plt.savefig(f"Tableau {date}.png", bbox_inches = 'tight')                       #Sauvegarde l'image avec la date des données et supprime et les marges exterieures
