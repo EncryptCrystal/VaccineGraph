@@ -120,7 +120,7 @@ for donnees in table:
     if age == 0:
         primo_injections_totales.append(primo_injections/obj_1_dose*100)
         injections_completes_totales.append(injections_completes/obj_tot_dose*100)
-        liste_dates.append(format_date(date))
+        liste_dates.append(formatDate(date))
         proportion_primo_vaccines.append(taux_primo_vaccines)
         proportion_vaccines.append(taux_vaccines)
 
@@ -189,12 +189,12 @@ plt.axvline(x=liste_dates[-1], color='gray', linestyle='--')
 plt.yticks(np.arange(0, 110, 10))
 plt.ylim(0, 105)
 
-plt.grid()                                                              #Ajout d'un grillage
-plt.legend()                                                            #Affiche les légendes associés à la courbe correspondante
-plt.margins(0, 0)                                                       #Force la disparition des marges intérieures
+plt.grid()                                                                      #Ajout d'un grillage
+plt.legend()                                                                    #Affiche les légendes associés à la courbe correspondante
+plt.margins(0, 0)                                                               #Force la disparition des marges intérieures
     
 #Défini les titres du graphes et des axes x et y
-plt.title(f"État des objectifs gouvernementaux pour la fin Août (Données du {format_date(nom_fichier[12:22])})")
+plt.title(f"État des objectifs gouvernementaux pour la fin Août (Données du {formatDate(nom_fichier[12:22])})")
 plt.xlabel("Dates")
 plt.ylabel("Pourcentage atteint des objectifs (%)")
     
