@@ -95,13 +95,13 @@ fichier.close()                                                                 
 table = sorted(table, key=itemgetter(1, 0))                                     #Tri les données par date, puis par âge
 
 while suppressionDate and table[0][1] != limite_date_debut: del table[0]        #Tant que la date limite n'est pas atteinte, continuer de supprimer les données
-"""
+
 #Vérifie la présense de données du 1er Septembre ou plus
 for i in range(len(table)):
     if table[i][1] == limite_date_fin:                                          #Si c'est le cas...
         del table[i:-1]                                                         #Supprime ces données
         donnees_racourcies = True                                               #Empeche la signalisation des valeurs prévisionelles
-        break"""
+        break
 
 #Initialisation des variables des dates et des 7 autres courbes
 liste_dates = []                                                                #Stocke la liste des dates en abscisse
@@ -164,21 +164,21 @@ position_date_limite = len(liste_dates)-1                                       
 
 #Sert à la création des dates ultérieurs à celles des données
 while liste_dates[-1][0:2] != "31" and liste_dates[-1][3:9] == "Juill":         #Sert à la création de dates datant d'avant le 31 Juillet
-    liste_dates.append(str(int(liste_dates[-1][0:3])+1)+" Juill")
+    liste_dates.append(str(int(liste_dates[-1][0:3])+1) + " Juill")
             
 if "01 Aou" not in liste_dates: liste_dates.append("01 Aou")
         
 while int(liste_dates[-1][0:2]) < 9 and liste_dates[-1][3:6] == "Aou":          #Sert à la création de dates datant d'entre le 1 Août et le 9 Août inclus
-    liste_dates.append("0"+str(int(liste_dates[-1][0:2])+1)+" Aou")
+    liste_dates.append("0"+str(int(liste_dates[-1][0:2])+1) + " Aou")
         
 while liste_dates[-1][0:2] != "31" and liste_dates[-1][3:6] == "Aou":           #Sert à la création de dates datant d'entre le 10 Août et 31 Août
-    liste_dates.append(str(int(liste_dates[-1][0:2])+1)+" Aou")
+    liste_dates.append(str(int(liste_dates[-1][0:2])+1) + " Aou")
     
 liste_dates_reduite = ecartDate(reduction(liste_dates))                         #Reduit la liste de dates tout en conservant l'original
 
 
 #Début de la contruction du graphique
-plt.figure(figsize=(16,9))                                                      #Définit une dimension en 16/9
+plt.figure(figsize = (16, 9))                                                      #Définit une dimension en 16/9
 plt.tick_params(axis = 'x', rotation = 80)                                      #Tourne les dates à 80° afin qu'elles restent visibles
 plt.axhline(y=100,color='gray',linestyle='--')                                  #Trace une ligne de pointillé verticale au niveau des 100%
 
@@ -195,7 +195,7 @@ plt.plot(liste_dates_reduite, ecartDate(reduction(projectionObjectif(proportion_
 if donnees_racourcies == False:
     plt.axvline(x = liste_dates_reduite[position_date_limite//limite_ecart_jour], color = 'gray', linestyle = '--')
     plt.axvspan(liste_dates_reduite[position_date_limite//limite_ecart_jour], liste_dates[-1], alpha = 0.5, color = 'lightgray')
-    plt.axvline(x = liste_dates[-1], color='gray', linestyle='--')
+    plt.axvline(x = liste_dates[-1], color = 'gray', linestyle = '--')
 
 plt.yticks(np.arange(0, 105, 10))                                               #Limite le maximum en y à 105% et force la création de jalons de 10%
 plt.ylim(0, 105)                                                                #Force le tableau à n'afficher y qu'entre 0% et 105%
@@ -209,5 +209,4 @@ plt.title(f"État des objectifs gouvernementaux pour la fin août (Données du {
 plt.xlabel("Dates")
 plt.ylabel("Pourcentage atteint des objectifs (%)")
     
-plt.savefig(f"Tableau {date}.png", dpi=170, bbox_inches='tight')                         #Sauvegarde l'image avec la date des données et supprime et les marges exterieures
-#plt.show()                                                                      #Affiche l'image
+plt.savefig(f"Tableau {date}.png", bbox_inches = 'tight')                         #Sauvegarde l'image avec la date des données et supprime et les marges exterieures
