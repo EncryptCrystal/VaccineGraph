@@ -5,9 +5,10 @@ import numpy as np
 
 
 nom_fichier = "vacsi-a-fra-2021-07-30-19h09.csv"                                #Nom du fichier de données à traiter
-limite_date_debut = "2021-02-02"                                                #Indique à partir de quelle date commence l'origine des données en format AAAA-MM-JJ (0 pour lever limite)
+limite_date_debut = "2021-02-02"                                                #Indique la première date des données (0 pour conserver la liste)
+limite_date_fin = "2021-09-01"                                                  #Exclure les données à partir du 1er Août (0 pour conserver la liste)
 limite_nombre_jour = 0                                                          #Indique le nombre de dates à inscrire sur l'axe des abscisses (0 ou 1 conserve la liste)
-limite_ecart_jour = 7                                                           #Indique le nombre d'espacement de dates (1 pour passer)
+limite_ecart_jour = 7                                                           #Espace de 7 jours les dates
 
 #Liste des objectifs
 obj_1_dose = 50000000                                                           #50 000 000 primo-vaccinés
@@ -21,9 +22,10 @@ pop_50_ans = 27824662                                                           
 pop_18_ans = 53761464                                                           #53 761 464 Français ont plus de 18 ans
 
 
-#Sert à limiter une liste à nb_element de manière uniforme
+
+#Sert à limiter une liste à limite_nombre_jour de manière uniforme
 def reduction(liste):
-    if limite_nombre_jour == 0 or limite_nombre_jour == 1: return liste         #nb_element ne doit pas être égal à 0 ou 1
+    if limite_nombre_jour == 0 or limite_nombre_jour == 1: return liste         #limite_nombre_jour ne doit pas être égal à 0 ou 1
     liste_compressee = []
     coeff = len(liste)/(limite_nombre_jour-1)                                   #Calcule l'écart idéal entre 2 éléments de la liste à compresser (prends en compte le premier et dernier élément)
     liste_compressee.append(liste[0])                                           #Ajoute le premier élement de la liste à compresser
@@ -52,12 +54,11 @@ def formatDate(date):
     return new_date
 
 #Sert à la projection des courbes
-def projectionObjectif(fonction):
-    projection = list(fonction)
-    coeff =  (fonction[-1]-fonction[-8])/7                                      #Évolution de la courbe calculé à partir des 7 derniers jours
-    while len(liste_dates) != len(projection):
-        projection.append(projection[-1]+coeff)
-    return projection
+def projectionObjectif(liste):
+    coeff =  (liste[-1]-liste[-8])/7                                            #Évolution de la courbe calculé à partir des 7 derniers jours
+    while len(liste_dates) != len(liste):                                       #Tant que la projection n'égale pas la date de fin (31 Août) :
+        liste.append(liste[-1]+coeff)
+    return liste
 
 #Sert à espacer les dates selon limite_ecart_jour
 def ecartDate(liste):
@@ -67,19 +68,22 @@ def ecartDate(liste):
         if i % limite_ecart_jour == 0: new_liste.append(liste[i])
     return new_liste
 
+
+#Début du script
 fichier = open(nom_fichier,"r")                                                 #Ouvre le fichier
 ligne_descripteurs = fichier.readline()
 lst_descripteurs = ligne_descripteurs.rstrip().rsplit(";")                      #Sépare la première ligne (titres des colonnes) du reste des valeurs numériques
 lignes = fichier.readlines()                                                    #Le reste est entreposée dans "lignes"
 table = []
+donnees_racourcies = False
 
-if limite_date_debut == 0: suppressionDate = False
-else: suppressionDate = True
+if limite_date_debut == 0: suppressionDate = False                              #Si limite_date_debut = 0, alors ne pas demander de limiter le nombre de dates
+else: suppressionDate = True                                                    #Sinon, le demande
 
 for ligne in lignes:
     lst = ligne.rstrip().split(";")
     del lst[0]                                                                  #Supression des valeurs du pays de l'injection (toutes dans le fichier sont en France)
-    lst[0] = int(lst[0])                                                        #Conversion de l'âge des vaccinés en nombre entier (de base une chaine de caractères.)
+    lst[0] = int(lst[0])                                                        #Conversion de l'âge des vaccinés en nombre entier (de base une chaine de caractères)
     del lst[2]                                                                  #Suppression des primo-injections quotidiennes
     del lst[2]                                                                  #Suppression des injections complètes quotidiennes
     lst[2] = int(lst[2])                                                        #Conversion du cumul des primo-injections en nombre entier
@@ -91,18 +95,26 @@ fichier.close()                                                                 
 table = sorted(table, key=itemgetter(1, 0))                                     #Tri les données par date, puis par âge
 
 while suppressionDate and table[0][1] != limite_date_debut: del table[0]        #Tant que la date limite n'est pas atteinte, continuer de supprimer les données
+"""
+#Vérifie la présense de données du 1er Septembre ou plus
+for i in range(len(table)):
+    if table[i][1] == limite_date_fin:                                          #Si c'est le cas...
+        del table[i:-1]                                                         #Supprime ces données
+        donnees_racourcies = True                                               #Empeche la signalisation des valeurs prévisionelles
+        break"""
 
 #Initialisation des variables des dates et des 7 autres courbes
-liste_dates = []
+liste_dates = []                                                                #Stocke la liste des dates en abscisse
 
-primo_injections_18_ans = []
-primo_injections_50_ans = []
-primo_injections_totales = []
-injections_completes_18_ans = []
-injections_completes_totales = []
-proportion_primo_vaccines = []
-proportion_vaccines = []
-    
+primo_injections_18_ans = []                                                    #Stocke la liste du nombre de primo-injections des +18 ans
+primo_injections_50_ans = []                                                    #Stocke la liste du nombre de primo-injections +50 ans
+primo_injections_totales = []                                                   #Stocke la liste du nombre de primo-injections totales
+injections_completes_18_ans = []                                                #Stocke la liste du nombre d'injections complètes des +18 ans
+injections_completes_totales = []                                               #Stocke la liste du nombre d'injections complètes des +50 ans
+proportion_primo_vaccines = []                                                  #Stocke la proportion de primo-vaccinés
+proportion_vaccines = []                                                        #Stocke la proportion de complètement vaccinés
+
+#Variables de transition entre les différentes classes d'âges
 cumul_primo_injections_18_ans = 0
 cumul_injections_completes_18_ans = 0
 cumul_primo_injections_50_ans = 0
@@ -151,24 +163,23 @@ for donnees in table:
 position_date_limite = len(liste_dates)-1                                       #Sauvegarde de la position du dernier jour dont on a les données
 
 #Sert à la création des dates ultérieurs à celles des données
-while liste_dates[-1][0:2] != "31" and liste_dates[-1][3:9] == "Juill":
+while liste_dates[-1][0:2] != "31" and liste_dates[-1][3:9] == "Juill":         #Sert à la création de dates datant d'avant le 31 Juillet
     liste_dates.append(str(int(liste_dates[-1][0:3])+1)+" Juill")
             
 if "01 Aou" not in liste_dates: liste_dates.append("01 Aou")
         
-while int(liste_dates[-1][0:2]) < 9 and liste_dates[-1][3:6] == "Aou":
+while int(liste_dates[-1][0:2]) < 9 and liste_dates[-1][3:6] == "Aou":          #Sert à la création de dates datant d'entre le 1 Août et le 9 Août inclus
     liste_dates.append("0"+str(int(liste_dates[-1][0:2])+1)+" Aou")
         
-while liste_dates[-1][0:2] != "31" and liste_dates[-1][3:6] == "Aou":
+while liste_dates[-1][0:2] != "31" and liste_dates[-1][3:6] == "Aou":           #Sert à la création de dates datant d'entre le 10 Août et 31 Août
     liste_dates.append(str(int(liste_dates[-1][0:2])+1)+" Aou")
     
 liste_dates_reduite = ecartDate(reduction(liste_dates))                         #Reduit la liste de dates tout en conservant l'original
 
 
 #Début de la contruction du graphique
-plt.figure(figsize=(16,9))                                                      #Définit une dimension en 16/9 à cause de la grande quantité de dates
+plt.figure(figsize=(16,9))                                                      #Définit une dimension en 16/9
 plt.tick_params(axis = 'x', rotation = 80)                                      #Tourne les dates à 80° afin qu'elles restent visibles
-    
 plt.axhline(y=100,color='gray',linestyle='--')                                  #Trace une ligne de pointillé verticale au niveau des 100%
 
 #Trace les courbes
@@ -180,24 +191,23 @@ plt.plot(liste_dates_reduite, ecartDate(reduction(projectionObjectif(injections_
 plt.plot(liste_dates_reduite, ecartDate(reduction(projectionObjectif(proportion_primo_vaccines))), "cyan", label = "Référence : Français 100% primo-vaccinés")
 plt.plot(liste_dates_reduite, ecartDate(reduction(projectionObjectif(proportion_vaccines))), "darkblue", label = "Référence : Français 100% vaccinés")
 
-#Trace une zone en gris clair entourée de ligne verticales en pointillé pour désigner les prédictions des courbes
-plt.axvline(x=liste_dates_reduite[position_date_limite//limite_ecart_jour], color='gray', linestyle='--')
-plt.axvspan(liste_dates_reduite[position_date_limite//limite_ecart_jour], liste_dates[-1], alpha=0.5, color='lightgray')
-plt.axvline(x=liste_dates[-1], color='gray', linestyle='--')
-    
-#Limite l'axe y à maximum 105% et force la création de jalons de 10%
-plt.yticks(np.arange(0, 110, 10))
-plt.ylim(0, 105)
+#Trace une zone en gris clair entourée de ligne verticales en pointillé pour désigner les prédictions des courbes si les données n'ont pas été raccourcis
+if donnees_racourcies == False:
+    plt.axvline(x = liste_dates_reduite[position_date_limite//limite_ecart_jour], color = 'gray', linestyle = '--')
+    plt.axvspan(liste_dates_reduite[position_date_limite//limite_ecart_jour], liste_dates[-1], alpha = 0.5, color = 'lightgray')
+    plt.axvline(x = liste_dates[-1], color='gray', linestyle='--')
+
+plt.yticks(np.arange(0, 105, 10))                                               #Limite le maximum en y à 105% et force la création de jalons de 10%
+plt.ylim(0, 105)                                                                #Force le tableau à n'afficher y qu'entre 0% et 105%
 
 plt.grid()                                                                      #Ajout d'un grillage
 plt.legend()                                                                    #Affiche les légendes associés à la courbe correspondante
 plt.margins(0, 0)                                                               #Force la disparition des marges intérieures
     
-#Défini les titres du graphes et des axes x et y
+#Défini les titres du graphe et des axes x et y
 plt.title(f"État des objectifs gouvernementaux pour la fin août (Données du {formatDate(nom_fichier[12:22])})")
 plt.xlabel("Dates")
 plt.ylabel("Pourcentage atteint des objectifs (%)")
     
-#Sauvegarde l'image suivant la date des données en 170 pouces de diagonale, et supprime et les marges exterieures
-plt.savefig(f"Tableau {date}.png", dpi=170, bbox_inches='tight')
-plt.show()
+plt.savefig(f"Tableau {date}.png", dpi=170, bbox_inches='tight')                         #Sauvegarde l'image avec la date des données et supprime et les marges exterieures
+#plt.show()                                                                      #Affiche l'image
