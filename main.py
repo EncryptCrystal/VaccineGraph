@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-nom_fichier = "vacsi-a-fra-2021-07-30-19h09.csv"                                #Nom du fichier de données à traiter
+nom_fichier = "vacsi-a-fra-2021-08-02-19h05.csv"                                #Nom du fichier de données à traiter
 limite_date_debut = "2020-12-29"                                                #Indique la première date des données (0 pour conserver la liste)
 limite_date_fin = "2021-09-01"                                                  #Exclure les données à partir du 1er Août (0 pour conserver la liste)
 limite_nombre_jour = 0                                                          #Indique le nombre de dates à inscrire sur l'axe des abscisses (0 ou 1 conserve la liste)
