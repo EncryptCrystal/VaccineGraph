@@ -9,6 +9,7 @@ limite_date_debut = "2020-12-29"                                                
 limite_date_fin = "2021-09-01"                                                  #Exclure les données à partir du 1er Août (0 pour conserver la liste)
 limite_nombre_jour = 0                                                          #Indique le nombre de dates à inscrire sur l'axe des abscisses (0 ou 1 conserve la liste)
 limite_ecart_jour = 7                                                           #Espace de 7 jours les dates
+nb_jour_prediction = 7                                                          #Fait des prévisions sur les jours suivants à partir des 7 derniers jours
 
 #Liste des objectifs
 obj_1_dose = 50000000                                                           #50 000 000 primo-vaccinés
@@ -55,7 +56,7 @@ def formatDate(date):
 
 #Sert à la projection des courbes
 def projectionObjectif(liste):
-    coeff =  (liste[-1]-liste[-8])/7                                            #Évolution de la courbe calculé à partir des 7 derniers jours
+    coeff =  (liste[-1]-liste[-1-nb_jour_prediction])/nb_jour_prediction        #Évolution de la courbe calculé à partir des 7 derniers jours
     while len(liste_dates) != len(liste):                                       #Tant que la projection n'égale pas la date de fin (31 Août) :
         liste.append(liste[-1]+coeff)
     return liste
@@ -203,7 +204,7 @@ plt.ylim(0, 105)                                                                
 plt.grid()                                                                      #Ajout d'un grillage
 plt.legend()                                                                    #Affiche les légendes associés à la courbe correspondante
 plt.margins(0, 0)                                                               #Force la disparition des marges intérieures
-    
+
 #Défini les titres du graphe et des axes x et y
 plt.title(f"État des objectifs gouvernementaux pour la fin août (Données du {formatDate(nom_fichier[12:22])})")
 plt.xlabel("Dates")
