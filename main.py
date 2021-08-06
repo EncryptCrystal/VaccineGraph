@@ -5,6 +5,8 @@ import numpy as np
 
 
 nom_fichier = "vacsi-a-fra-2021-08-05-19h05.csv"                                #Nom du fichier de données à traiter
+
+#Paramètres du graphique
 limite_date_debut = "2020-12-29"                                                #Indique la première date des données (0 pour conserver la liste)
 limite_date_fin = "2021-08-31"                                                  #Exclure les données à partir du 1er Août (0 pour conserver la liste)
 limite_nombre_jour = 0                                                          #Indique le nombre de dates à inscrire sur l'axe des abscisses (0 ou 1 conserve la liste)
@@ -114,10 +116,10 @@ for ligne in lignes:
     lst[4] = float(lst[4])                                                      #Conversion du taux de primo-vaccinés en nombre entier
     lst[5] = float(lst[5])                                                      #Conversion du taux de vaccinés en nombre entier
     table.append(lst)
+    if lst[1] == limite_date_debut and limite_date_debut !=0: suppressionDate = True
 fichier.close()                                                                 #Ferme le fichier
 table = sorted(table, key=itemgetter(1, 0))                                     #Tri les données par date, puis par âge
 
-#!!! Ne vérifie pas que limite_date_debut contient la date en question
 #Tant que la date limite n'est pas atteinte, continuer de supprimer les données
 while suppressionDate and table[0][1] != limite_date_debut: del table[0]
 
