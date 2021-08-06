@@ -4,9 +4,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-nom_fichier = "vacsi-a-fra-2021-08-03-19h05.csv"                                #Nom du fichier de données à traiter
+nom_fichier = "vacsi-a-fra-2021-08-05-19h05.csv"                                #Nom du fichier de données à traiter
 limite_date_debut = "2020-12-29"                                                #Indique la première date des données (0 pour conserver la liste)
-limite_date_fin = "2021-09-01"                                                  #Exclure les données à partir du 1er Août (0 pour conserver la liste)
+limite_date_fin = "2021-08-31"                                                  #Exclure les données à partir du 1er Août (0 pour conserver la liste)
 limite_nombre_jour = 0                                                          #Indique le nombre de dates à inscrire sur l'axe des abscisses (0 ou 1 conserve la liste)
 limite_ecart_jour = 7                                                           #Espace de 7 jours les dates
 nb_jour_prediction = 7                                                          #Fait des prévisions sur les jours suivants à partir des 7 derniers jours
@@ -28,7 +28,7 @@ pop_18_ans = 53761464                                                           
 def reduction(liste):
     if limite_nombre_jour == 0 or limite_nombre_jour == 1: return liste         #limite_nombre_jour ne doit pas être égal à 0 ou 1
     liste_compressee = []
-    coeff = len(liste)/(limite_nombre_jour-1)                                   #Calcule l'écart idéal entre 2 éléments de la liste à compresser (prends en compte le premier et dernier élément)
+    coeff = len(liste)/(limite_nombre_jour-1)                                   #Calcule l'écart idéal entre 2 éléments de la liste à compresser
     liste_compressee.append(liste[0])                                           #Ajoute le premier élement de la liste à compresser
     for i in range(len(liste)):
         if int(i/coeff) == len(liste_compressee):                               #Si la position de l'élément est supérieure ou égale à sa position dans la liste compressée
@@ -54,9 +54,31 @@ def formatDate(date):
     else: new_date += " Dec"
     return new_date
 
+#Sert à créer une liste de dates jusqu'à une date limite
+def creationDate(date):
+    nouvelles_dates = []
+    while date != limite_date_fin:
+        date = date[0:8] + str(int(date[8:])+1)
+        if len(date[8:]) == 1: date = date[0:8] + "0" + date[-1] 
+        if date[5:7] == "01" and date[8:10] == "32": date = date[0:5] + "02-01"
+        elif date[5:7] == "02" and date[8:10] == "29" and int(date[0:4])%4 != 0: date = date[0:5] + "03-01"
+        elif date[5:7] == "02" and date[8:10] == "30" and int(date[0:4])%4 == 0: date = date[0:5] + "03-01"
+        elif date[5:7] == "03" and date[8:10] == "32": date = date[0:5] + "04-01"
+        elif date[5:7] == "04" and date[8:10] == "31": date = date[0:5] + "05-01"
+        elif date[5:7] == "05" and date[8:10] == "32": date = date[0:5] + "06-01"
+        elif date[5:7] == "06" and date[8:10] == "31": date = date[0:5] + "07-01"
+        elif date[5:7] == "07" and date[8:10] == "32": date = date[0:5] + "08-01"
+        elif date[5:7] == "08" and date[8:10] == "32": date = date[0:5] + "09-01"
+        elif date[5:7] == "09" and date[8:10] == "31": date = date[0:5] + "10-01"
+        elif date[5:7] == "10" and date[8:10] == "32": date = date[0:5] + "11-01"
+        elif date[5:7] == "11" and date[8:10] == "31": date = date[0:5] + "12-01"
+        elif date[5:7] == "12" and date[8:10] == "32": date = str(int(date[0:4])+1) + "-01-01"
+        nouvelles_dates.append(date)
+    return nouvelles_dates
+
 #Sert à la projection des courbes
 def projectionObjectif(liste):
-    coeff =  (liste[-1]-liste[-1-nb_jour_prediction])/nb_jour_prediction        #Évolution de la courbe calculé à partir des 7 derniers jours
+    coeff = (liste[-1]-liste[-1-nb_jour_prediction])/nb_jour_prediction         #Évolution de la courbe calculé à partir des 7 derniers jours
     while len(liste_dates) != len(liste):                                       #Tant que la projection n'égale pas la date de fin (31 Août) :
         liste.append(liste[-1]+coeff)
     return liste
@@ -95,12 +117,14 @@ for ligne in lignes:
 fichier.close()                                                                 #Ferme le fichier
 table = sorted(table, key=itemgetter(1, 0))                                     #Tri les données par date, puis par âge
 
-while suppressionDate and table[0][1] != limite_date_debut: del table[0]        #Tant que la date limite n'est pas atteinte, continuer de supprimer les données
+#!!! Ne vérifie pas que limite_date_debut contient la date en question
+#Tant que la date limite n'est pas atteinte, continuer de supprimer les données
+while suppressionDate and table[0][1] != limite_date_debut: del table[0]
 
 #Vérifie la présense de données du 1er Septembre ou plus
 for i in range(len(table)):
     if table[i][1] == limite_date_fin:                                          #Si c'est le cas...
-        del table[i:-1]                                                         #Supprime ces données
+        del table[i+15:]                                                        #Supprime ces données
         donnees_racourcies = True                                               #Empeche la signalisation des valeurs prévisionelles
         break
 
@@ -133,7 +157,7 @@ for donnees in table:
     if age == 0:
         primo_injections_totales.append(primo_injections/obj_1_dose*100)
         injections_completes_totales.append(injections_completes/obj_tot_dose*100)
-        liste_dates.append(formatDate(date))
+        liste_dates.append(date)
         proportion_primo_vaccines.append(taux_primo_vaccines)
         proportion_vaccines.append(taux_vaccines)
 
@@ -163,18 +187,10 @@ for donnees in table:
 
 position_date_limite = len(liste_dates)-1                                       #Sauvegarde de la position du dernier jour dont on a les données
 
-#Sert à la création des dates ultérieurs à celles des données
-while liste_dates[-1][0:2] != "31" and liste_dates[-1][3:9] == "Juill":         #Sert à la création de dates datant d'avant le 31 Juillet
-    liste_dates.append(str(int(liste_dates[-1][0:3])+1) + " Juill")
-            
-if "01 Aou" not in liste_dates: liste_dates.append("01 Aou")
-        
-while int(liste_dates[-1][0:2]) < 9 and liste_dates[-1][3:6] == "Aou":          #Sert à la création de dates datant d'entre le 1 Août et le 9 Août inclus
-    liste_dates.append("0"+str(int(liste_dates[-1][0:2])+1) + " Aou")
-        
-while liste_dates[-1][0:2] != "31" and liste_dates[-1][3:6] == "Aou":           #Sert à la création de dates datant d'entre le 10 Août et 31 Août
-    liste_dates.append(str(int(liste_dates[-1][0:2])+1) + " Aou")
-    
+liste_dates += creationDate(liste_dates[-1])                                    #Ajout des dates manquantes antérieurs à la date limite de fin
+
+for i in range(len(liste_dates)): liste_dates[i] = formatDate(liste_dates[i])
+
 liste_dates_reduite = ecartDate(reduction(liste_dates))                         #Reduit la liste de dates tout en conservant l'original
 
 
