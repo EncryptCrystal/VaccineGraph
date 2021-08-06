@@ -13,7 +13,7 @@ nb_jour_prediction = 7                                                          
 
 #Liste des objectifs
 obj_1_dose = 50000000                                                           #50 000 000 primo-vaccinés
-obj_tot_dose = 35000000                                                         #35 000 000 vaccinés
+obj_tot_dose = 40000000                                                         #40 000 000 vaccinés
 obj_50_ans_1_dose = 0.85                                                        #85% des +50 ans primo-vaccinés
 obj_18_ans_1_dose = 0.75                                                        #75% des +18 ans primo-vaccinés
 obj_18_ans_tot_dose = 0.66                                                      #66% des +18 ans complétement vaccinés
