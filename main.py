@@ -195,7 +195,7 @@ liste_dates_reduite = ecartDate(reduction(liste_dates))                         
 
 
 #Début de la contruction du graphique
-plt.figure(figsize = (16, 5))                                                   #Définit une dimension en 16/9
+plt.figure(figsize = (16, 5))                                                   #Définit une dimension en 16/5
 plt.tick_params(axis = 'x', rotation = 80)                                      #Tourne les dates à 80° afin qu'elles restent visibles
 
 #Trace les courbes
