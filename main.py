@@ -119,8 +119,6 @@ for ligne in lignes:
 fichier.close()                                                                 #Ferme le fichier
 table = sorted(table, key=itemgetter(1, 0))                                     #Tri les données par date, puis par âge
 
-print(suppressionDate)
-
 #Tant que la date limite n'est pas atteinte, continuer de supprimer les données
 while suppressionDate and table[0][1] != limite_date_debut: del table[0]
 
@@ -210,11 +208,10 @@ plt.plot(liste_dates_reduite, ecartDate(reduction(projectionObjectif(injections_
 plt.plot(liste_dates_reduite, ecartDate(reduction(projectionObjectif(proportion_primo_vaccines))), "cyan", label = "Référence : Français 100% primo-vaccinés")
 plt.plot(liste_dates_reduite, ecartDate(reduction(projectionObjectif(proportion_vaccines))), "darkblue", label = "Référence : Français 100% vaccinés")
 
-#Trace une zone en gris clair entourée de ligne verticales en pointillé pour désigner les prédictions des courbes si les données n'ont pas été raccourcis
+#Trace une zone en gris clair délimitée par une ligne verticales en pointillé pour désigner les prédictions des courbes (si les données n'ont pas été raccourcis)
 if donnees_racourcies == False:
     plt.axvline(x = liste_dates_reduite[position_date_limite//limite_ecart_jour], color = 'gray', linestyle = '--')
     plt.axvspan(liste_dates_reduite[position_date_limite//limite_ecart_jour], liste_dates_reduite[-1], alpha = 0.5, color = 'lightgray')
-    plt.axvline(x = liste_dates_reduite[-1], color = 'gray', linestyle = '--')
 
 plt.yticks(np.arange(0, 100.01, 10))                                            #Limite le maximum en y à 105% et force la création de jalons de 10%
 plt.ylim(0, 100.01)                                                             #Force le tableau à n'afficher y qu'entre 0% et 105%
