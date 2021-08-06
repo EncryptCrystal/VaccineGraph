@@ -8,8 +8,8 @@ nom_fichier = "vacsi-a-fra-2021-08-05-19h05.csv"                                
 limite_date_debut = "2020-12-29"                                                #Indique la première date des données (0 pour conserver la liste)
 limite_date_fin = "2021-08-31"                                                  #Exclure les données à partir du 1er Août (0 pour conserver la liste)
 limite_nombre_jour = 0                                                          #Indique le nombre de dates à inscrire sur l'axe des abscisses (0 ou 1 conserve la liste)
-limite_ecart_jour = 7                                                           #Espace de 7 jours les dates
-nb_jour_prediction = 7                                                          #Fait des prévisions sur les jours suivants à partir des 7 derniers jours
+limite_ecart_jour = 7                                                           #Espace de n jours les dates
+nb_jour_prediction = 7                                                          #Fait des prévisions sur les jours suivants à partir des n derniers jours
 
 #Liste des objectifs
 obj_1_dose = 50000000                                                           #50 000 000 primo-vaccinés
@@ -210,8 +210,8 @@ plt.plot(liste_dates_reduite, ecartDate(reduction(projectionObjectif(proportion_
 #Trace une zone en gris clair entourée de ligne verticales en pointillé pour désigner les prédictions des courbes si les données n'ont pas été raccourcis
 if donnees_racourcies == False:
     plt.axvline(x = liste_dates_reduite[position_date_limite//limite_ecart_jour], color = 'gray', linestyle = '--')
-    plt.axvspan(liste_dates_reduite[position_date_limite//limite_ecart_jour], liste_dates[-1], alpha = 0.5, color = 'lightgray')
-    plt.axvline(x = liste_dates[-1], color = 'gray', linestyle = '--')
+    plt.axvspan(liste_dates_reduite[position_date_limite//limite_ecart_jour], liste_dates_reduite[-1], alpha = 0.5, color = 'lightgray')
+    plt.axvline(x = liste_dates_reduite[-1], color = 'gray', linestyle = '--')
 
 plt.yticks(np.arange(0, 100.01, 10))                                            #Limite le maximum en y à 105% et force la création de jalons de 10%
 plt.ylim(0, 100.01)                                                             #Force le tableau à n'afficher y qu'entre 0% et 105%
