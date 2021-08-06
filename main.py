@@ -8,7 +8,7 @@ nom_fichier = "vacsi-a-fra-2021-08-05-19h05.csv"                                
 
 #Paramètres du graphique
 limite_date_debut = "2020-12-29"                                                #Indique la première date des données (0 pour conserver la liste)
-limite_date_fin = "2021-08-31"                                                  #Exclure les données à partir du 1er Août (0 pour conserver la liste)
+limite_date_fin = 0                                                             #Exclure les données à partir du 1er Août (0 pour conserver la liste)
 limite_nombre_jour = 0                                                          #Indique le nombre de dates à inscrire sur l'axe des abscisses (0 ou 1 conserve la liste)
 limite_ecart_jour = 7                                                           #Espace de n jours les dates
 nb_jour_prediction = 7                                                          #Fait des prévisions sur les jours suivants à partir des n derniers jours
@@ -82,7 +82,8 @@ def creationDate(date):
 def projectionObjectif(liste):
     coeff = (liste[-1]-liste[-1-nb_jour_prediction])/nb_jour_prediction         #Évolution de la courbe calculé à partir des 7 derniers jours
     while len(liste_dates) != len(liste):                                       #Tant que la projection n'égale pas la date de fin (31 Août) :
-        liste.append(liste[-1]+coeff)
+        if liste[-1]+coeff <= 100: liste.append(liste[-1]+coeff)
+        else: liste.append(100)
     return liste
 
 #Sert à espacer les dates selon limite_ecart_jour
@@ -92,7 +93,6 @@ def ecartDate(liste):
     for i in range(len(liste)):
         if i % limite_ecart_jour == 0: new_liste.append(liste[i])
     return new_liste
-
 
 #Début du script
 fichier = open(nom_fichier,"r")                                                 #Ouvre le fichier
@@ -132,18 +132,23 @@ for i in range(len(table)):
 #Initialisation des variables des dates et des 7 autres courbes
 liste_dates = []                                                                #Stocke la liste des dates en abscisse
 
-primo_injections_18_ans = []                                                    #Stocke la liste du nombre de primo-injections des +18 ans
-primo_injections_50_ans = []                                                    #Stocke la liste du nombre de primo-injections +50 ans
-primo_injections_totales = []                                                   #Stocke la liste du nombre de primo-injections totales
-injections_completes_18_ans = []                                                #Stocke la liste du nombre d'injections complètes des +18 ans
-injections_completes_totales = []                                               #Stocke la liste du nombre d'injections complètes des +50 ans
 proportion_primo_vaccines = []                                                  #Stocke la proportion de primo-vaccinés
+proportion_primo_injections_12_17_ans = []                                      #Stocke la liste du nombre de primo-injections des 12-17 ans
+proportion_primo_injections_18_49_ans = []                                      #Stocke la liste du nombre de primo-injections des 18-49 ans
+proportion_primo_injections_50_79_ans = []                                      #Stocke la liste du nombre de primo-injections des 50-79 ans
+proportion_primo_injections_80_ans = []                                         #Stocke la liste du nombre de primo-injections des +80 ans
+
 proportion_vaccines = []                                                        #Stocke la proportion de complètement vaccinés
+proportion_injections_completes_12_17_ans = []                                  #Stocke la liste du nombre de primo-injections des 12-17 ans
+proportion_injections_completes_18_49_ans = []                                  #Stocke la liste du nombre de primo-injections des 18-49 ans
+proportion_injections_completes_50_79_ans = []                                  #Stocke la liste du nombre de primo-injections des 50-79 ans
+proportion_injections_completes_80_ans = []                                     #Stocke la liste du nombre de primo-injections des +80 ans
 
 #Variables de transition entre les différentes classes d'âges
-cumul_primo_injections_18_ans = 0
-cumul_injections_completes_18_ans = 0
-cumul_primo_injections_50_ans = 0
+cumul_proportion_primo_injections_18_49_ans = 0
+cumul_proportion_injections_completes_18_49_ans = 0
+cumul_proportion_primo_injections_50_79_ans = 0
+cumul_proportion_injections_completes_50_79_ans = 0
     
 for donnees in table:
     #Afin de faciliter la compréhension du code, les 6 colonnes sont assignés à des variables
@@ -156,35 +161,37 @@ for donnees in table:
 
     #Dans le cas où la ligne concerne les injections tout âge confondu...
     if age == 0:
-        primo_injections_totales.append(primo_injections/obj_1_dose*100)
-        injections_completes_totales.append(injections_completes/obj_tot_dose*100)
         liste_dates.append(date)
         proportion_primo_vaccines.append(taux_primo_vaccines)
         proportion_vaccines.append(taux_vaccines)
+    
+    #Dans le cas où la ligne concerne les injections de personnes entre 12 et 17 ans...
+    elif age == 17:
+        proportion_primo_injections_12_17_ans.append(taux_primo_vaccines)
 
     #Dans le cas où la ligne concerne les injections de personnes entre 18 et 49 ans...
     elif 18 <= age <= 49:
-        cumul_primo_injections_18_ans += primo_injections
-        cumul_injections_completes_18_ans += injections_completes
+        cumul_proportion_primo_injections_18_49_ans += primo_injections
+        cumul_proportion_injections_completes_18_49_ans += injections_completes
 
     #Dans le cas où la ligne concerne les injections de personnes entre 50 et 79 ans...
     elif 50 <= age <= 79:
-        cumul_primo_injections_50_ans += primo_injections
-        cumul_primo_injections_18_ans += primo_injections
-        cumul_injections_completes_18_ans += injections_completes
+        cumul_proportion_primo_injections_50_79_ans += primo_injections
+        cumul_proportion_primo_injections_18_49_ans += primo_injections
+        cumul_proportion_injections_completes_18_49_ans += injections_completes
 
     #Dans le cas où la ligne concerne les injections de personnes de plus de 80 ans...
     elif age == 80:
-        cumul_primo_injections_50_ans += primo_injections
-        primo_injections_50_ans.append(cumul_primo_injections_50_ans/pop_50_ans/obj_50_ans_1_dose*100)
-        cumul_primo_injections_50_ans = 0
+        cumul_proportion_primo_injections_50_79_ans += primo_injections
+        proportion_primo_injections_50_79_ans.append(cumul_proportion_primo_injections_50_79_ans/pop_50_ans/obj_50_ans_1_dose*100)
+        cumul_proportion_primo_injections_50_79_ans = 0
         
-        cumul_primo_injections_18_ans += primo_injections
-        cumul_injections_completes_18_ans += injections_completes
-        primo_injections_18_ans.append(cumul_primo_injections_18_ans/pop_18_ans/obj_18_ans_1_dose*100)
-        injections_completes_18_ans.append(cumul_injections_completes_18_ans/pop_18_ans/obj_18_ans_tot_dose*100)
-        cumul_primo_injections_18_ans = 0
-        cumul_injections_completes_18_ans = 0
+        cumul_proportion_primo_injections_18_49_ans += primo_injections
+        cumul_proportion_injections_completes_18_49_ans += injections_completes
+        proportion_primo_injections_18_49_ans.append(cumul_proportion_primo_injections_18_49_ans/pop_18_ans/obj_18_ans_1_dose*100)
+        proportion_injections_completes_18_49_ans.append(cumul_proportion_injections_completes_18_49_ans/pop_18_ans/obj_18_ans_tot_dose*100)
+        cumul_proportion_primo_injections_18_49_ans = 0
+        cumul_proportion_injections_completes_18_49_ans = 0
 
 position_date_limite = len(liste_dates)-1                                       #Sauvegarde de la position du dernier jour dont on a les données
 
@@ -199,14 +206,13 @@ liste_dates_reduite = ecartDate(reduction(liste_dates))                         
 plt.figure(figsize = (16, 5))                                                   #Définit une dimension en 16/5
 plt.tick_params(axis = 'x', rotation = 80)                                      #Tourne les dates à 80° afin qu'elles restent visibles
 
-#Trace les courbes
-plt.plot(liste_dates_reduite, ecartDate(reduction(projectionObjectif(primo_injections_totales))), "red", label = f"Objectif de primo-vaccinés ({int(obj_1_dose/1000000)} M)")
-plt.plot(liste_dates_reduite, ecartDate(reduction(projectionObjectif(injections_completes_totales))), "firebrick", label = f"Objectif de vaccinés ({int(obj_tot_dose/1000000)} M)")
-plt.plot(liste_dates_reduite, ecartDate(reduction(projectionObjectif(primo_injections_50_ans))), "orange", label = f"Objectif des +50 ans primo-vaccinés ({int(obj_50_ans_1_dose*100)}%)")
-plt.plot(liste_dates_reduite, ecartDate(reduction(projectionObjectif(primo_injections_18_ans))), "lawngreen", label = f"Objectif des +18 ans primo-vaccinés ({int(obj_18_ans_1_dose*100)}%)")
-plt.plot(liste_dates_reduite, ecartDate(reduction(projectionObjectif(injections_completes_18_ans))), "darkgreen", label = f"Objectif des +18 ans vaccinés ({int(obj_18_ans_tot_dose*100)}%)")
-plt.plot(liste_dates_reduite, ecartDate(reduction(projectionObjectif(proportion_primo_vaccines))), "cyan", label = "Référence : Français 100% primo-vaccinés")
-plt.plot(liste_dates_reduite, ecartDate(reduction(projectionObjectif(proportion_vaccines))), "darkblue", label = "Référence : Français 100% vaccinés")
+#Trace les courbe
+plt.plot(liste_dates_reduite, ecartDate(reduction(projectionObjectif(proportion_primo_vaccines))), "cyan", label = "Français primo-vaccinés")
+plt.plot(liste_dates_reduite, ecartDate(reduction(projectionObjectif(proportion_vaccines))), "darkblue", label = "Français vaccinés")
+plt.plot(liste_dates_reduite, ecartDate(reduction(projectionObjectif(proportion_primo_injections_50_79_ans))), "yellow", label = "50-79 ans primo-vaccinés")
+plt.plot(liste_dates_reduite, ecartDate(reduction(projectionObjectif(proportion_primo_injections_50_79_ans))), "orange", label = "50-79 ans vaccinés")
+plt.plot(liste_dates_reduite, ecartDate(reduction(projectionObjectif(proportion_primo_injections_18_49_ans))), "lawngreen", label = "18-49 ans primo-vaccinés")
+plt.plot(liste_dates_reduite, ecartDate(reduction(projectionObjectif(proportion_injections_completes_18_49_ans))), "darkgreen", label = "18-49 ans vaccinés")
 
 #Trace une zone en gris clair délimitée par une ligne verticales en pointillé pour désigner les prédictions des courbes (si les données n'ont pas été raccourcis)
 if donnees_racourcies == False:
