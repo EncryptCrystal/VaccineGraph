@@ -145,7 +145,7 @@ cumul_injections_completes_18_ans = 0
 cumul_primo_injections_50_ans = 0
     
 for donnees in table:
-    #Afin de faciliter la compréhension du code, les 4 colonnes sont assignés à des variables
+    #Afin de faciliter la compréhension du code, les 6 colonnes sont assignés à des variables
     age = donnees[0]
     date = donnees[1]
     primo_injections = donnees[2]
@@ -197,7 +197,6 @@ liste_dates_reduite = ecartDate(reduction(liste_dates))                         
 #Début de la contruction du graphique
 plt.figure(figsize = (16, 5))                                                   #Définit une dimension en 16/9
 plt.tick_params(axis = 'x', rotation = 80)                                      #Tourne les dates à 80° afin qu'elles restent visibles
-plt.axhline(y=100,color='gray',linestyle='--')                                  #Trace une ligne de pointillé verticale au niveau des 100%
 
 #Trace les courbes
 plt.plot(liste_dates_reduite, ecartDate(reduction(projectionObjectif(primo_injections_totales))), "red", label = f"Objectif de primo-vaccinés ({int(obj_1_dose/1000000)} M)")
@@ -214,8 +213,8 @@ if donnees_racourcies == False:
     plt.axvspan(liste_dates_reduite[position_date_limite//limite_ecart_jour], liste_dates[-1], alpha = 0.5, color = 'lightgray')
     plt.axvline(x = liste_dates[-1], color = 'gray', linestyle = '--')
 
-plt.yticks(np.arange(0, 105, 10))                                               #Limite le maximum en y à 105% et force la création de jalons de 10%
-plt.ylim(0, 105)                                                                #Force le tableau à n'afficher y qu'entre 0% et 105%
+plt.yticks(np.arange(0, 100.01, 10))                                            #Limite le maximum en y à 105% et force la création de jalons de 10%
+plt.ylim(0, 100.01)                                                             #Force le tableau à n'afficher y qu'entre 0% et 105%
 
 plt.grid()                                                                      #Ajout d'un grillage
 plt.legend()                                                                    #Affiche les légendes associés à la courbe correspondante
