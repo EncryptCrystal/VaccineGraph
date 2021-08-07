@@ -7,8 +7,8 @@ import numpy as np
 nom_fichier = "vacsi-a-fra-2021-08-05-19h05.csv"                                #Nom du fichier de données à traiter
 
 #Paramètres du graphique
-limite_date_debut = "2020-12-29"                                                #Indique la première date des données (0 pour conserver la liste)
-limite_date_fin = 0                                                  #Exclure les données à partir du 1er Août (0 pour conserver la liste)
+limite_date_debut = 0                                                           #Indique la première date des données (0 pour conserver la liste)
+limite_date_fin = 0                                                             #Exclure les données à partir du 1er Août (0 pour conserver la liste)
 limite_nombre_jour = 0                                                          #Indique le nombre de dates à inscrire sur l'axe des abscisses (0 ou 1 conserve la liste)
 limite_ecart_jour = 7                                                           #Espace de n jours les dates
 nb_jour_prediction = 7                                                          #Fait des prévisions sur les jours suivants à partir des n derniers jours
@@ -48,29 +48,6 @@ def formatDate(date):
     elif date[1] == "11": new_date += " Nov"
     else: new_date += " Dec"
     return new_date
-
-#Sert à créer une liste de dates jusqu'à une date limite
-def creationDate(date):
-    nouvelles_dates = []
-    if limite_date_fin == 0: return []
-    while date != limite_date_fin:
-        date = date[0:8] + str(int(date[8:])+1)
-        if len(date[8:]) == 1: date = date[0:8] + "0" + date[-1] 
-        if date[5:7] == "01" and date[8:10] == "32": date = date[0:5] + "02-01"
-        elif date[5:7] == "02" and date[8:10] == "29" and int(date[0:4])%4 != 0: date = date[0:5] + "03-01"
-        elif date[5:7] == "02" and date[8:10] == "30" and int(date[0:4])%4 == 0: date = date[0:5] + "03-01"
-        elif date[5:7] == "03" and date[8:10] == "32": date = date[0:5] + "04-01"
-        elif date[5:7] == "04" and date[8:10] == "31": date = date[0:5] + "05-01"
-        elif date[5:7] == "05" and date[8:10] == "32": date = date[0:5] + "06-01"
-        elif date[5:7] == "06" and date[8:10] == "31": date = date[0:5] + "07-01"
-        elif date[5:7] == "07" and date[8:10] == "32": date = date[0:5] + "08-01"
-        elif date[5:7] == "08" and date[8:10] == "32": date = date[0:5] + "09-01"
-        elif date[5:7] == "09" and date[8:10] == "31": date = date[0:5] + "10-01"
-        elif date[5:7] == "10" and date[8:10] == "32": date = date[0:5] + "11-01"
-        elif date[5:7] == "11" and date[8:10] == "31": date = date[0:5] + "12-01"
-        elif date[5:7] == "12" and date[8:10] == "32": date = str(int(date[0:4])+1) + "-01-01"
-        nouvelles_dates.append(date)
-    return nouvelles_dates
 
 #Sert à la projection des courbes
 def projectionObjectif(liste):
@@ -187,10 +164,29 @@ for donnees in table:
         proportion_primo_injections_80_ans.append(taux_primo_vaccines)
         proportion_injections_completes_80_ans.append(taux_vaccines)
 
-
 position_date_limite = len(liste_dates)-1                                       #Sauvegarde de la position du dernier jour dont on a les données
 
-liste_dates += creationDate(liste_dates[-1])                                    #Ajout des dates manquantes antérieurs à la date limite de fin
+#Tant que la proportion de vaccinés n'est pas de 100%, étendre le graphique
+coeff = (proportion_vaccines[-1]-proportion_vaccines[-1-nb_jour_prediction])/nb_jour_prediction
+i = 0
+while i <= int((100-proportion_vaccines[-1])/coeff)+1 or len(liste_dates)%limite_ecart_jour !=0:
+    date = date[0:8] + str(int(date[8:])+1)
+    if len(date[8:]) == 1: date = date[0:8] + "0" + date[-1] 
+    if date[5:7] == "01" and date[8:10] == "32": date = date[0:5] + "02-01"
+    elif date[5:7] == "02" and date[8:10] == "29" and int(date[0:4])%4 != 0: date = date[0:5] + "03-01"
+    elif date[5:7] == "02" and date[8:10] == "30" and int(date[0:4])%4 == 0: date = date[0:5] + "03-01"
+    elif date[5:7] == "03" and date[8:10] == "32": date = date[0:5] + "04-01"
+    elif date[5:7] == "04" and date[8:10] == "31": date = date[0:5] + "05-01"
+    elif date[5:7] == "05" and date[8:10] == "32": date = date[0:5] + "06-01"
+    elif date[5:7] == "06" and date[8:10] == "31": date = date[0:5] + "07-01"
+    elif date[5:7] == "07" and date[8:10] == "32": date = date[0:5] + "08-01"
+    elif date[5:7] == "08" and date[8:10] == "32": date = date[0:5] + "09-01"
+    elif date[5:7] == "09" and date[8:10] == "31": date = date[0:5] + "10-01"
+    elif date[5:7] == "10" and date[8:10] == "32": date = date[0:5] + "11-01"
+    elif date[5:7] == "11" and date[8:10] == "31": date = date[0:5] + "12-01"
+    elif date[5:7] == "12" and date[8:10] == "32": date = str(int(date[0:4])+1) + "-01-01"
+    i += 1
+    liste_dates.append(date)
 
 for i in range(len(liste_dates)): liste_dates[i] = formatDate(liste_dates[i])
 
@@ -226,8 +222,8 @@ plt.legend()                                                                    
 plt.margins(0, 0)                                                               #Force la disparition des marges intérieures
 
 #Défini les titres du graphe et des axes x et y
-plt.title(f"Avancement de la vaccination (Données du {formatDate(nom_fichier[12:22])})")
+plt.title(f"Avancement de la vaccination (Données du {nom_fichier[20:22]}/{nom_fichier[17:19]}/{nom_fichier[12:16]})")
 plt.xlabel("Dates")
 plt.ylabel("Pourcentage de vaccinés (%)")
-    
-plt.savefig(f"Tableau {date}.png", bbox_inches = 'tight')                       #Sauvegarde l'image avec la date des données et supprime et les marges exterieures
+
+plt.savefig(f"Tableau {nom_fichier[12:22]}.png", bbox_inches = 'tight')         #Sauvegarde l'image avec la date des données et supprime et les marges exterieures
