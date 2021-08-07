@@ -49,7 +49,7 @@ def formatDate(date):
     elif date[1] == "05": new_date += " Mai"                                    #En fonction de la valeur de MM (nombre),on rajoute la valeur MMM (lettres) correspondante
     elif date[1] == "06": new_date += " Juin"
     elif date[1] == "07": new_date += " Juill"
-    elif date[1] == "08": new_date += " Aou"
+    elif date[1] == "08": new_date += " Aoû"
     elif date[1] == "09": new_date += " Sep"
     elif date[1] == "10": new_date += " Oct"
     elif date[1] == "11": new_date += " Nov"
@@ -221,7 +221,7 @@ plt.legend()                                                                    
 plt.margins(0, 0)                                                               #Force la disparition des marges intérieures
 
 #Défini les titres du graphe et des axes x et y
-plt.title(f"État des objectifs gouvernementaux pour la fin août (Données du {formatDate(nom_fichier[12:22])})")
+plt.title(f"État des objectifs gouvernementaux pour la fin août (Données du {nom_fichier[20:22]}/{nom_fichier[17:19]}/{nom_fichier[12:16]})")
 plt.xlabel("Dates")
 plt.ylabel("Pourcentage atteint des objectifs (%)")
     
