@@ -8,21 +8,14 @@ nom_fichier = "vacsi-a-fra-2021-08-05-19h05.csv"                                
 
 #Paramètres du graphique
 limite_date_debut = "2020-12-29"                                                #Indique la première date des données (0 pour conserver la liste)
-limite_date_fin = 0                                                             #Exclure les données à partir du 1er Août (0 pour conserver la liste)
+limite_date_fin = 0                                                  #Exclure les données à partir du 1er Août (0 pour conserver la liste)
 limite_nombre_jour = 0                                                          #Indique le nombre de dates à inscrire sur l'axe des abscisses (0 ou 1 conserve la liste)
 limite_ecart_jour = 7                                                           #Espace de n jours les dates
 nb_jour_prediction = 7                                                          #Fait des prévisions sur les jours suivants à partir des n derniers jours
 
-#Liste des objectifs
-obj_1_dose = 50000000                                                           #50 000 000 primo-vaccinés
-obj_tot_dose = 40000000                                                         #40 000 000 vaccinés
-obj_50_ans_1_dose = 0.85                                                        #85% des +50 ans primo-vaccinés
-obj_18_ans_1_dose = 0.75                                                        #75% des +18 ans primo-vaccinés
-obj_18_ans_tot_dose = 0.66                                                      #66% des +18 ans complétement vaccinés
-
 #Données sur la population (Insee, 2021) (https://www.insee.fr/fr/outil-interactif/5367857/details/20_DEM/21_POP/21C_Figure3#)
-pop_50_ans = 27824662                                                           #27 824 662 Français ont plus de 50 ans
-pop_18_ans = 53761464                                                           #53 761 464 Français ont plus de 18 ans
+pop_50_79_ans = 22772098                                                        #22 772 098 Français ont entre 50 et 79 ans
+pop_18_49_ans = 26026248                                                        #26 026 248 Français ont entre 18 et 49 ans
 
 
 
@@ -59,6 +52,7 @@ def formatDate(date):
 #Sert à créer une liste de dates jusqu'à une date limite
 def creationDate(date):
     nouvelles_dates = []
+    if limite_date_fin == 0: return []
     while date != limite_date_fin:
         date = date[0:8] + str(int(date[8:])+1)
         if len(date[8:]) == 1: date = date[0:8] + "0" + date[-1] 
@@ -133,16 +127,16 @@ for i in range(len(table)):
 liste_dates = []                                                                #Stocke la liste des dates en abscisse
 
 proportion_primo_vaccines = []                                                  #Stocke la proportion de primo-vaccinés
-proportion_primo_injections_12_17_ans = []                                      #Stocke la liste du nombre de primo-injections des 12-17 ans
-proportion_primo_injections_18_49_ans = []                                      #Stocke la liste du nombre de primo-injections des 18-49 ans
-proportion_primo_injections_50_79_ans = []                                      #Stocke la liste du nombre de primo-injections des 50-79 ans
-proportion_primo_injections_80_ans = []                                         #Stocke la liste du nombre de primo-injections des +80 ans
+proportion_primo_injections_12_17_ans = []                                      #Stocke la liste de la proportion de primo-vaccinés des 12-17 ans
+proportion_primo_injections_18_49_ans = []                                      #Stocke la liste de la proportion de primo-vaccinés des 18-49 ans
+proportion_primo_injections_50_79_ans = []                                      #Stocke la liste de la proportion de primo-vaccinés des 50-79 ans
+proportion_primo_injections_80_ans = []                                         #Stocke la liste de la proportion de primo-vaccinés des +80 ans
 
 proportion_vaccines = []                                                        #Stocke la proportion de complètement vaccinés
-proportion_injections_completes_12_17_ans = []                                  #Stocke la liste du nombre de primo-injections des 12-17 ans
-proportion_injections_completes_18_49_ans = []                                  #Stocke la liste du nombre de primo-injections des 18-49 ans
-proportion_injections_completes_50_79_ans = []                                  #Stocke la liste du nombre de primo-injections des 50-79 ans
-proportion_injections_completes_80_ans = []                                     #Stocke la liste du nombre de primo-injections des +80 ans
+proportion_injections_completes_12_17_ans = []                                  #Stocke la liste de la proportion de vaccinés des 12-17 ans
+proportion_injections_completes_18_49_ans = []                                  #Stocke la liste de la proportion de vaccinés des 18-49 ans
+proportion_injections_completes_50_79_ans = []                                  #Stocke la liste de la proportion de vaccinés des 50-79 ans
+proportion_injections_completes_80_ans = []                                     #Stocke la liste de la proportion de vaccinés des +80 ans
 
 #Variables de transition entre les différentes classes d'âges
 cumul_proportion_primo_injections_18_49_ans = 0
@@ -168,30 +162,31 @@ for donnees in table:
     #Dans le cas où la ligne concerne les injections de personnes entre 12 et 17 ans...
     elif age == 17:
         proportion_primo_injections_12_17_ans.append(taux_primo_vaccines)
+        proportion_injections_completes_12_17_ans.append(taux_vaccines)
 
     #Dans le cas où la ligne concerne les injections de personnes entre 18 et 49 ans...
     elif 18 <= age <= 49:
         cumul_proportion_primo_injections_18_49_ans += primo_injections
         cumul_proportion_injections_completes_18_49_ans += injections_completes
 
-    #Dans le cas où la ligne concerne les injections de personnes entre 50 et 79 ans...
+        if age == 49:
+            proportion_primo_injections_18_49_ans.append(cumul_proportion_primo_injections_18_49_ans/pop_18_49_ans)
+            proportion_injections_completes_18_49_ans.append(cumul_proportion_injections_completes_18_49_ans/pop_18_49_ans)
+
+    #Dans le cas où la ligne concerne les injections de personnes entre 50 et 74 ans...
     elif 50 <= age <= 79:
         cumul_proportion_primo_injections_50_79_ans += primo_injections
-        cumul_proportion_primo_injections_18_49_ans += primo_injections
-        cumul_proportion_injections_completes_18_49_ans += injections_completes
+        cumul_proportion_injections_completes_50_79_ans += injections_completes
+    
+        if age == 79:
+            proportion_primo_injections_50_79_ans.append(cumul_proportion_primo_injections_50_79_ans/pop_50_79_ans)
+            proportion_injections_completes_50_79_ans.append(cumul_proportion_injections_completes_50_79_ans/pop_50_79_ans)
 
     #Dans le cas où la ligne concerne les injections de personnes de plus de 80 ans...
     elif age == 80:
-        cumul_proportion_primo_injections_50_79_ans += primo_injections
-        proportion_primo_injections_50_79_ans.append(cumul_proportion_primo_injections_50_79_ans/pop_50_ans/obj_50_ans_1_dose*100)
-        cumul_proportion_primo_injections_50_79_ans = 0
-        
-        cumul_proportion_primo_injections_18_49_ans += primo_injections
-        cumul_proportion_injections_completes_18_49_ans += injections_completes
-        proportion_primo_injections_18_49_ans.append(cumul_proportion_primo_injections_18_49_ans/pop_18_ans/obj_18_ans_1_dose*100)
-        proportion_injections_completes_18_49_ans.append(cumul_proportion_injections_completes_18_49_ans/pop_18_ans/obj_18_ans_tot_dose*100)
-        cumul_proportion_primo_injections_18_49_ans = 0
-        cumul_proportion_injections_completes_18_49_ans = 0
+        proportion_primo_injections_80_ans.append(taux_primo_vaccines)
+        proportion_injections_completes_80_ans.append(taux_vaccines)
+
 
 position_date_limite = len(liste_dates)-1                                       #Sauvegarde de la position du dernier jour dont on a les données
 
@@ -207,12 +202,16 @@ plt.figure(figsize = (16, 5))                                                   
 plt.tick_params(axis = 'x', rotation = 80)                                      #Tourne les dates à 80° afin qu'elles restent visibles
 
 #Trace les courbe
-plt.plot(liste_dates_reduite, ecartDate(reduction(projectionObjectif(proportion_primo_vaccines))), "cyan", label = "Français primo-vaccinés")
-plt.plot(liste_dates_reduite, ecartDate(reduction(projectionObjectif(proportion_vaccines))), "darkblue", label = "Français vaccinés")
+plt.plot(liste_dates_reduite, ecartDate(reduction(projectionObjectif(proportion_primo_vaccines))), "red", label = "Français primo-vaccinés")
+plt.plot(liste_dates_reduite, ecartDate(reduction(projectionObjectif(proportion_vaccines))), "brown", label = "Français vaccinés")
+plt.plot(liste_dates_reduite, ecartDate(reduction(projectionObjectif(proportion_primo_injections_80_ans))), "cyan", label = "+80 ans primo-vaccinés")
+plt.plot(liste_dates_reduite, ecartDate(reduction(projectionObjectif(proportion_injections_completes_80_ans))), "darkblue", label = "+80 ans vaccinés")
 plt.plot(liste_dates_reduite, ecartDate(reduction(projectionObjectif(proportion_primo_injections_50_79_ans))), "yellow", label = "50-79 ans primo-vaccinés")
-plt.plot(liste_dates_reduite, ecartDate(reduction(projectionObjectif(proportion_primo_injections_50_79_ans))), "orange", label = "50-79 ans vaccinés")
+plt.plot(liste_dates_reduite, ecartDate(reduction(projectionObjectif(proportion_injections_completes_50_79_ans))), "orange", label = "50-79 ans vaccinés")
 plt.plot(liste_dates_reduite, ecartDate(reduction(projectionObjectif(proportion_primo_injections_18_49_ans))), "lawngreen", label = "18-49 ans primo-vaccinés")
 plt.plot(liste_dates_reduite, ecartDate(reduction(projectionObjectif(proportion_injections_completes_18_49_ans))), "darkgreen", label = "18-49 ans vaccinés")
+plt.plot(liste_dates_reduite, ecartDate(reduction(projectionObjectif(proportion_primo_injections_12_17_ans))), label = "12-17 ans primo-vaccinés")
+plt.plot(liste_dates_reduite, ecartDate(reduction(projectionObjectif(proportion_injections_completes_12_17_ans))), label = "12-17 ans vaccinés")
 
 #Trace une zone en gris clair délimitée par une ligne verticales en pointillé pour désigner les prédictions des courbes (si les données n'ont pas été raccourcis)
 if donnees_racourcies == False:
@@ -227,8 +226,8 @@ plt.legend()                                                                    
 plt.margins(0, 0)                                                               #Force la disparition des marges intérieures
 
 #Défini les titres du graphe et des axes x et y
-plt.title(f"État des objectifs gouvernementaux pour la fin août (Données du {formatDate(nom_fichier[12:22])})")
+plt.title(f"Avancement de la vaccination (Données du {formatDate(nom_fichier[12:22])})")
 plt.xlabel("Dates")
-plt.ylabel("Pourcentage atteint des objectifs (%)")
+plt.ylabel("Pourcentage de vaccinés (%)")
     
 plt.savefig(f"Tableau {date}.png", bbox_inches = 'tight')                       #Sauvegarde l'image avec la date des données et supprime et les marges exterieures
