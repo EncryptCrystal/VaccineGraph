@@ -193,8 +193,8 @@ if donnees_racourcies == False:
     plt.axvline(x = liste_dates_reduite[position_date_limite//limite_ecart_jour], color = 'gray', linestyle = '--')
     plt.axvspan(liste_dates_reduite[position_date_limite//limite_ecart_jour], liste_dates_reduite[-1], alpha = 0.5, color = 'lightgray')
 
-plt.yticks(np.arange(0, 100.01, 10))                                            #Limite le maximum en y à 105% et force la création de jalons de 10%
-plt.ylim(0, 100.01)                                                             #Force le tableau à n'afficher y qu'entre 0% et 105%
+plt.yticks(np.arange(0, 100.01, 10))                                            #Limite le maximum en y à 100% et force la création de jalons de 10%
+plt.ylim(0, 100.01)                                                             #Force le tableau à n'afficher y qu'entre 0% et 100%
 
 plt.grid()                                                                      #Ajout d'un grillage
 plt.legend()                                                                    #Affiche les légendes associés à la courbe correspondante
@@ -205,4 +205,4 @@ plt.title(f"État des objectifs gouvernementaux pour la fin août (Données du {
 plt.xlabel("Dates")
 plt.ylabel("Pourcentage atteint des objectifs (%)")
     
-plt.savefig(f"Tableau {nom_fichier[12:22]}.png", bbox_inches = 'tight')                       #Sauvegarde l'image avec la date des données et supprime et les marges exterieures
+plt.savefig(f"Tableau {nom_fichier[12:22]}.png", bbox_inches = 'tight')         #Sauvegarde l'image avec la date des données et supprime et les marges exterieures
