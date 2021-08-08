@@ -38,46 +38,6 @@ def reduction(liste):
     liste_compressee.append(liste[-1])                                          #Ajoute le dernier élement de la liste dans la liste à compresser
     return liste_compressee
 
-#Sert à formater les dates : "AAAA-MM-JJ" -> "JJ MMM"
-def formatDate(date):
-    date = date.rsplit("-")                                                     #Sépare la chaine en une liste de 3 éléments : [AAAA, MM, JJ]
-    new_date = date[2]                                                          #Prend la valeur des jours
-    if date[1] == "01": new_date += " Jan"
-    elif date[1] == "02": new_date += " Fev"
-    elif date[1] == "03": new_date += " Mar"
-    elif date[1] == "04": new_date += " Avr"
-    elif date[1] == "05": new_date += " Mai"                                    #En fonction de la valeur de MM (nombre),on rajoute la valeur MMM (lettres) correspondante
-    elif date[1] == "06": new_date += " Juin"
-    elif date[1] == "07": new_date += " Juill"
-    elif date[1] == "08": new_date += " Aoû"
-    elif date[1] == "09": new_date += " Sep"
-    elif date[1] == "10": new_date += " Oct"
-    elif date[1] == "11": new_date += " Nov"
-    else: new_date += " Dec"
-    return new_date
-
-#Sert à créer une liste de dates jusqu'à une date limite
-def creationDate(date):
-    nouvelles_dates = []
-    while date != limite_date_fin:
-        date = date[0:8] + str(int(date[8:])+1)
-        if len(date[8:]) == 1: date = date[0:8] + "0" + date[-1] 
-        if date[5:7] == "01" and date[8:10] == "32": date = date[0:5] + "02-01"
-        elif date[5:7] == "02" and date[8:10] == "29" and int(date[0:4])%4 != 0: date = date[0:5] + "03-01"
-        elif date[5:7] == "02" and date[8:10] == "30" and int(date[0:4])%4 == 0: date = date[0:5] + "03-01"
-        elif date[5:7] == "03" and date[8:10] == "32": date = date[0:5] + "04-01"
-        elif date[5:7] == "04" and date[8:10] == "31": date = date[0:5] + "05-01"
-        elif date[5:7] == "05" and date[8:10] == "32": date = date[0:5] + "06-01"
-        elif date[5:7] == "06" and date[8:10] == "31": date = date[0:5] + "07-01"
-        elif date[5:7] == "07" and date[8:10] == "32": date = date[0:5] + "08-01"
-        elif date[5:7] == "08" and date[8:10] == "32": date = date[0:5] + "09-01"
-        elif date[5:7] == "09" and date[8:10] == "31": date = date[0:5] + "10-01"
-        elif date[5:7] == "10" and date[8:10] == "32": date = date[0:5] + "11-01"
-        elif date[5:7] == "11" and date[8:10] == "31": date = date[0:5] + "12-01"
-        elif date[5:7] == "12" and date[8:10] == "32": date = str(int(date[0:4])+1) + "-01-01"
-        nouvelles_dates.append(date)
-    return nouvelles_dates
-
 #Sert à la projection des courbes
 def projectionObjectif(liste):
     coeff = (liste[-1]-liste[-1-nb_jour_prediction])/nb_jour_prediction         #Évolution de la courbe calculé à partir des 7 derniers jours
@@ -188,9 +148,29 @@ for donnees in table:
 
 position_date_limite = len(liste_dates)-1                                       #Sauvegarde de la position du dernier jour dont on a les données
 
-liste_dates += creationDate(liste_dates[-1])                                    #Ajout des dates manquantes antérieurs à la date limite de fin
+#Sert à créer une liste de dates jusqu'à une date limite
+while liste_dates[-1] != limite_date_fin and limite_date_fin != 0:
+    date = liste_dates[-1]
+    date = date[0:8] + str(int(date[8:])+1)
+    if len(date[8:]) == 1: date = date[0:8] + "0" + date[-1] 
+    if date[5:7] == "01" and date[8:10] == "32": date = date[0:5] + "02-01"
+    elif date[5:7] == "02" and date[8:10] == "29" and int(date[0:4])%4 != 0: date = date[0:5] + "03-01"
+    elif date[5:7] == "02" and date[8:10] == "30" and int(date[0:4])%4 == 0: date = date[0:5] + "03-01"
+    elif date[5:7] == "03" and date[8:10] == "32": date = date[0:5] + "04-01"
+    elif date[5:7] == "04" and date[8:10] == "31": date = date[0:5] + "05-01"
+    elif date[5:7] == "05" and date[8:10] == "32": date = date[0:5] + "06-01"
+    elif date[5:7] == "06" and date[8:10] == "31": date = date[0:5] + "07-01"
+    elif date[5:7] == "07" and date[8:10] == "32": date = date[0:5] + "08-01"
+    elif date[5:7] == "08" and date[8:10] == "32": date = date[0:5] + "09-01"
+    elif date[5:7] == "09" and date[8:10] == "31": date = date[0:5] + "10-01"
+    elif date[5:7] == "10" and date[8:10] == "32": date = date[0:5] + "11-01"
+    elif date[5:7] == "11" and date[8:10] == "31": date = date[0:5] + "12-01"
+    elif date[5:7] == "12" and date[8:10] == "32": date = str(int(date[0:4])+1) + "-01-01"
+    liste_dates.append(date)
 
-for i in range(len(liste_dates)): liste_dates[i] = formatDate(liste_dates[i])
+#Change le format de toutes les dates
+for i in range(len(liste_dates)):
+    liste_dates[i] = liste_dates[i][8:11]+"/"+liste_dates[i][5:7]
 
 liste_dates_reduite = ecartDate(reduction(liste_dates))                         #Reduit la liste de dates tout en conservant l'original
 
