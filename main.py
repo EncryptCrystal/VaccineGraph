@@ -53,8 +53,7 @@ def formatDate(date):
 def projectionObjectif(liste):
     coeff = (liste[-1]-liste[-1-nb_jour_prediction])/nb_jour_prediction         #Évolution de la courbe calculé à partir des 7 derniers jours
     while len(liste_dates) != len(liste):                                       #Tant que la projection n'égale pas la date de fin (31 Août) :
-        if liste[-1]+coeff <= 100: liste.append(liste[-1]+coeff)
-        else: liste.append(100)
+        liste.append(liste[-1]+coeff)
     return liste
 
 #Sert à espacer les dates selon limite_ecart_jour
@@ -206,8 +205,8 @@ plt.plot(liste_dates_reduite, ecartDate(reduction(projectionObjectif(proportion_
 plt.plot(liste_dates_reduite, ecartDate(reduction(projectionObjectif(proportion_injections_completes_50_79_ans))), "orange", label = "50-79 ans vaccinés")
 plt.plot(liste_dates_reduite, ecartDate(reduction(projectionObjectif(proportion_primo_injections_18_49_ans))), "lawngreen", label = "18-49 ans primo-vaccinés")
 plt.plot(liste_dates_reduite, ecartDate(reduction(projectionObjectif(proportion_injections_completes_18_49_ans))), "darkgreen", label = "18-49 ans vaccinés")
-plt.plot(liste_dates_reduite, ecartDate(reduction(projectionObjectif(proportion_primo_injections_12_17_ans))), label = "12-17 ans primo-vaccinés")
-plt.plot(liste_dates_reduite, ecartDate(reduction(projectionObjectif(proportion_injections_completes_12_17_ans))), label = "12-17 ans vaccinés")
+plt.plot(liste_dates_reduite, ecartDate(reduction(projectionObjectif(proportion_primo_injections_12_17_ans))), "pink", label = "12-17 ans primo-vaccinés")
+plt.plot(liste_dates_reduite, ecartDate(reduction(projectionObjectif(proportion_injections_completes_12_17_ans))), "purple", label = "12-17 ans vaccinés")
 
 #Trace une zone en gris clair délimitée par une ligne verticales en pointillé pour désigner les prédictions des courbes (si les données n'ont pas été raccourcis)
 if donnees_racourcies == False:
