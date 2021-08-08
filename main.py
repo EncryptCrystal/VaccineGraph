@@ -8,7 +8,7 @@ nom_fichier = "vacsi-a-fra-2021-08-06-20h05.csv"                                
 
 #Paramètres du graphique
 limite_date_debut = "2020-12-29"                                                #Indique la première date des données (0 pour conserver la liste)
-limite_date_fin = "2021-08-31"                                                  #Exclure les données à partir du 1er Août (0 pour conserver la liste)
+limite_date_fin = "2021-08-31"                                                  #Exclure les données à partir d'une certaine date (0 pour conserver la liste)
 limite_nombre_jour = 0                                                          #Indique le nombre de dates à inscrire sur l'axe des abscisses (0 ou 1 conserve la liste)
 limite_ecart_jour = 7                                                           #Espace de n jours les dates
 nb_jour_prediction = 7                                                          #Fait des prévisions sur les jours suivants à partir des n derniers jours
@@ -64,8 +64,8 @@ lst_descripteurs = ligne_descripteurs.rstrip().rsplit(";")                      
 lignes = fichier.readlines()                                                    #Le reste est entreposée dans "lignes"
 table = []
 
-empecher_valeurs_previsionnelles = False                                        #Par défaut, ne pas empecher les valeurs prévisionnelles
-limite_date_debut_existe = False                                                #Par défaut, ne pas demander de limiter le nombre de dates
+empecher_valeurs_previsionnelles = False                                        #Par défaut, ne pas empêcher de tracer les valeurs prévisionnelles
+limite_date_debut_existe = False                                                #Par défaut, ne pas supprimer des dates sans vérifier que la limite de début existe
 
 for ligne in lignes:
     lst = ligne.rstrip().split(";")
@@ -82,14 +82,14 @@ for ligne in lignes:
 fichier.close()                                                                 #Ferme le fichier
 table = sorted(table, key=itemgetter(1, 0))                                     #Tri les données par date, puis par âge
 
-#Tant que la date limite n'est pas atteinte, continuer de supprimer les données
+#Tant que la date limite de début n'est pas atteinte et si elle existe, continuer de supprimer les données
 while limite_date_debut_existe and table[0][1] != limite_date_debut: del table[0]
 
-#Vérifie la présense de données du 1er Septembre ou plus
+#Vérifie la présense de données de données ultérieurs à la date limite de fin
 for i in range(len(table)):
     if table[i][1] == limite_date_fin:                                          #Si c'est le cas...
         del table[i+15:]                                                        #Supprime ces données
-        empecher_valeurs_previsionnelles = True                                 #Empeche la signalisation des valeurs prévisionelles
+        empecher_valeurs_previsionnelles = True                                 #Empêche la signalisation des valeurs prévisionelles (pas besoin)
         break
 
 #Initialisation des variables des dates et des 7 autres courbes
@@ -151,7 +151,7 @@ for donnees in table:
 
 position_date_limite = len(liste_dates)-1                                       #Sauvegarde de la position du dernier jour dont on a les données
 
-#Sert à créer une liste de dates jusqu'à une date limite
+#Sert à créer une liste de dates jusqu'à une date limite de fin (s'il y en a une)
 while liste_dates[-1] != limite_date_fin and limite_date_fin != 0:
     date = liste_dates[-1]
     date = date[0:8] + str(int(date[8:])+1)
@@ -171,7 +171,7 @@ while liste_dates[-1] != limite_date_fin and limite_date_fin != 0:
     elif date[5:7] == "12" and date[8:10] == "32": date = str(int(date[0:4])+1) + "-01-01"
     liste_dates.append(date)
 
-#Change le format de toutes les dates
+#Passe le format de toutes les dates : AAAA-MM-JJ -> JJ/MM
 for i in range(len(liste_dates)):
     liste_dates[i] = liste_dates[i][8:11]+"/"+liste_dates[i][5:7]
 
@@ -196,8 +196,8 @@ if empecher_valeurs_previsionnelles == False:
     plt.axvline(x = liste_dates_reduite[position_date_limite//limite_ecart_jour], color = 'gray', linestyle = '--')
     plt.axvspan(liste_dates_reduite[position_date_limite//limite_ecart_jour], liste_dates_reduite[-1], alpha = 0.5, color = 'lightgray')
 
-plt.yticks(np.arange(y_min, y_max+0.01, 10))                                            #Limite le maximum en y à 100% et force la création de jalons de 10%
-plt.ylim(y_min, y_max+0.01)                                                             #Force le tableau à n'afficher y qu'entre 0% et 100%
+plt.yticks(np.arange(y_min, y_max+0.01, 10))                                    #Limite le maximum en y à 100% et force la création de jalons de 10%
+plt.ylim(y_min, y_max+0.01)                                                     #Force le tableau à n'afficher y qu'entre 0% et 100%
 
 plt.grid()                                                                      #Ajout d'un grillage
 plt.legend()                                                                    #Affiche les légendes associés à la courbe correspondante
