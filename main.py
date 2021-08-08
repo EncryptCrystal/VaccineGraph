@@ -65,7 +65,7 @@ lignes = fichier.readlines()                                                    
 table = []
 donnees_racourcies = False
 
-suppressionDate = False                                                         #Par défaut, ne pas demander de limiter le nombre de dates
+limite_date_debut_existe = False                                                #Par défaut, ne pas demander de limiter le nombre de dates
 
 for ligne in lignes:
     lst = ligne.rstrip().split(";")
@@ -78,12 +78,12 @@ for ligne in lignes:
     lst[4] = float(lst[4])                                                      #Conversion du taux de primo-vaccinés en nombre entier
     lst[5] = float(lst[5])                                                      #Conversion du taux de vaccinés en nombre entier
     table.append(lst)
-    if lst[1] == limite_date_debut: suppressionDate = True                      #Limiter le nombre de dates si la limite existe dans le fichier
+    if lst[1] == limite_date_debut: limite_date_debut_existe = True             #Limiter le nombre de dates si la limite existe dans le fichier
 fichier.close()                                                                 #Ferme le fichier
 table = sorted(table, key=itemgetter(1, 0))                                     #Tri les données par date, puis par âge
 
 #Tant que la date limite n'est pas atteinte, continuer de supprimer les données
-while suppressionDate and table[0][1] != limite_date_debut: del table[0]
+while limite_date_debut_existe and table[0][1] != limite_date_debut: del table[0]
 
 #Vérifie la présense de données du 1er Septembre ou plus
 for i in range(len(table)):
