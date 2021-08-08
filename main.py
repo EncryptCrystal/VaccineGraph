@@ -44,8 +44,7 @@ def reduction(liste):
 #Sert à la projection des courbes
 def projectionObjectif(liste):
     coeff = (liste[-1]-liste[-1-nb_jour_prediction])/nb_jour_prediction         #Évolution de la courbe calculé à partir des 7 derniers jours
-    while len(liste_dates) != len(liste):                                       #Tant que la projection n'égale pas la date de fin (31 Août) :
-        liste.append(liste[-1]+coeff)
+    while len(liste_dates) != len(liste): liste.append(liste[-1]+coeff)         #Tant que la projection n'égale pas la date de fin, continuer la projection
     return liste
 
 #Sert à espacer les dates selon limite_ecart_jour
@@ -172,8 +171,7 @@ while liste_dates[-1] != limite_date_fin and limite_date_fin != 0:
     liste_dates.append(date)
 
 #Passe le format de toutes les dates : AAAA-MM-JJ -> JJ/MM
-for i in range(len(liste_dates)):
-    liste_dates[i] = liste_dates[i][8:11]+"/"+liste_dates[i][5:7]
+for i in range(len(liste_dates)): liste_dates[i] = liste_dates[i][8:11]+"/"+liste_dates[i][5:7]
 
 liste_dates_reduite = ecartDate(reduction(liste_dates))                         #Reduit la liste de dates tout en conservant l'original
 
