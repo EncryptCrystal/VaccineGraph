@@ -204,7 +204,7 @@ plt.legend()                                                                    
 plt.margins(0, 0)                                                               #Force la disparition des marges intérieures
 
 #Défini les titres du graphe et des axes x et y
-plt.title(f"État des objectifs gouvernementaux pour la fin août (Données du {nom_fichier[20:22]}/{nom_fichier[17:19]}/{nom_fichier[12:16]})")
+plt.title(f"État des objectifs gouvernementaux pour la fin août (données du {nom_fichier[20:22]}/{nom_fichier[17:19]}/{nom_fichier[12:16]})")
 plt.xlabel("Dates")
 plt.ylabel("Pourcentage atteint des objectifs (%)")
     
