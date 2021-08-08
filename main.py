@@ -12,6 +12,9 @@ limite_date_fin = "2021-08-31"                                                  
 limite_nombre_jour = 0                                                          #Indique le nombre de dates à inscrire sur l'axe des abscisses (0 ou 1 conserve la liste)
 limite_ecart_jour = 7                                                           #Espace de n jours les dates
 nb_jour_prediction = 7                                                          #Fait des prévisions sur les jours suivants à partir des n derniers jours
+y_min = 0                                                                       #Définit le pourcentage minimum affiché
+y_max = 100                                                                     #Définit le pourcentage maximum affiché
+
 
 #Liste des objectifs
 obj_1_dose = 50000000                                                           #50 000 000 primo-vaccinés
@@ -193,8 +196,8 @@ if donnees_racourcies == False:
     plt.axvline(x = liste_dates_reduite[position_date_limite//limite_ecart_jour], color = 'gray', linestyle = '--')
     plt.axvspan(liste_dates_reduite[position_date_limite//limite_ecart_jour], liste_dates_reduite[-1], alpha = 0.5, color = 'lightgray')
 
-plt.yticks(np.arange(0, 100.01, 10))                                            #Limite le maximum en y à 100% et force la création de jalons de 10%
-plt.ylim(0, 100.01)                                                             #Force le tableau à n'afficher y qu'entre 0% et 100%
+plt.yticks(np.arange(y_min, y_max+0.01, 10))                                            #Limite le maximum en y à 100% et force la création de jalons de 10%
+plt.ylim(y_min, y_max+0.01)                                                             #Force le tableau à n'afficher y qu'entre 0% et 100%
 
 plt.grid()                                                                      #Ajout d'un grillage
 plt.legend()                                                                    #Affiche les légendes associés à la courbe correspondante
