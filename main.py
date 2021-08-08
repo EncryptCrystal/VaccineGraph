@@ -63,8 +63,8 @@ ligne_descripteurs = fichier.readline()
 lst_descripteurs = ligne_descripteurs.rstrip().rsplit(";")                      #Sépare la première ligne (titres des colonnes) du reste des valeurs numériques
 lignes = fichier.readlines()                                                    #Le reste est entreposée dans "lignes"
 table = []
-donnees_racourcies = False
 
+empecher_valeurs_previsionnelles = False                                        #Par défaut, ne pas empecher les valeurs prévisionnelles
 limite_date_debut_existe = False                                                #Par défaut, ne pas demander de limiter le nombre de dates
 
 for ligne in lignes:
@@ -89,7 +89,7 @@ while limite_date_debut_existe and table[0][1] != limite_date_debut: del table[0
 for i in range(len(table)):
     if table[i][1] == limite_date_fin:                                          #Si c'est le cas...
         del table[i+15:]                                                        #Supprime ces données
-        donnees_racourcies = True                                               #Empeche la signalisation des valeurs prévisionelles
+        empecher_valeurs_previsionnelles = True                                 #Empeche la signalisation des valeurs prévisionelles
         break
 
 #Initialisation des variables des dates et des 7 autres courbes
@@ -192,7 +192,7 @@ plt.plot(liste_dates_reduite, ecartDate(reduction(projectionObjectif(proportion_
 plt.plot(liste_dates_reduite, ecartDate(reduction(projectionObjectif(proportion_vaccines))), "darkblue", label = "Référence : Français 100% vaccinés")
 
 #Trace une zone en gris clair délimitée par une ligne verticales en pointillé pour désigner les prédictions des courbes (si les données n'ont pas été raccourcis)
-if donnees_racourcies == False:
+if empecher_valeurs_previsionnelles == False:
     plt.axvline(x = liste_dates_reduite[position_date_limite//limite_ecart_jour], color = 'gray', linestyle = '--')
     plt.axvspan(liste_dates_reduite[position_date_limite//limite_ecart_jour], liste_dates_reduite[-1], alpha = 0.5, color = 'lightgray')
 
