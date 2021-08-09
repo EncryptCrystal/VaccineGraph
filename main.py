@@ -8,10 +8,12 @@ nom_fichier = "vacsi-a-fra-2021-08-05-19h05.csv"                                
 
 #Paramètres du graphique
 limite_date_debut = 0                                                           #Indique la première date des données (0 pour conserver la liste)
-limite_date_fin = 0                                                             #Exclure les données à partir du 1er Août (0 pour conserver la liste)
+limite_date_fin = 0                                                             #Exclure les données à partir d'une certaine date (0 pour conserver la liste)
 limite_nombre_jour = 0                                                          #Indique le nombre de dates à inscrire sur l'axe des abscisses (0 ou 1 conserve la liste)
 limite_ecart_jour = 7                                                           #Espace de n jours les dates
 nb_jour_prediction = 7                                                          #Fait des prévisions sur les jours suivants à partir des n derniers jours
+y_min = 0                                                                       #Définit le pourcentage minimum affiché
+y_max = 100                                                                     #Définit le pourcentage maximum affiché
 
 #Données sur la population (Insee, 2021) (https://www.insee.fr/fr/outil-interactif/5367857/details/20_DEM/21_POP/21C_Figure3#)
 pop_50_79_ans = 22772098                                                        #22 772 098 Français ont entre 50 et 79 ans
@@ -31,29 +33,10 @@ def reduction(liste):
     liste_compressee.append(liste[-1])                                          #Ajoute le dernier élement de la liste dans la liste à compresser
     return liste_compressee
 
-#Sert à formater les dates : "AAAA-MM-JJ" -> "JJ MMM"
-def formatDate(date):
-    date = date.rsplit("-")                                                     #Sépare la chaine en une liste de 3 éléments : [AAAA, MM, JJ]
-    new_date = date[2]                                                          #Prend la valeur des jours
-    if date[1] == "01": new_date += " Jan"
-    elif date[1] == "02": new_date += " Fev"
-    elif date[1] == "03": new_date += " Mar"
-    elif date[1] == "04": new_date += " Avr"
-    elif date[1] == "05": new_date += " Mai"                                    #En fonction de la valeur de MM (nombre),on rajoute la valeur MMM (lettres) correspondante
-    elif date[1] == "06": new_date += " Juin"
-    elif date[1] == "07": new_date += " Juill"
-    elif date[1] == "08": new_date += " Aou"
-    elif date[1] == "09": new_date += " Sep"
-    elif date[1] == "10": new_date += " Oct"
-    elif date[1] == "11": new_date += " Nov"
-    else: new_date += " Dec"
-    return new_date
-
 #Sert à la projection des courbes
 def projectionObjectif(liste):
     coeff = (liste[-1]-liste[-1-nb_jour_prediction])/nb_jour_prediction         #Évolution de la courbe calculé à partir des 7 derniers jours
-    while len(liste_dates) != len(liste):                                       #Tant que la projection n'égale pas la date de fin (31 Août) :
-        liste.append(liste[-1]+coeff)
+    while len(liste_dates) != len(liste): liste.append(liste[-1]+coeff)         #Tant que la projection n'égale pas la date de fin, continuer la projection
     return liste
 
 #Sert à espacer les dates selon limite_ecart_jour
@@ -64,15 +47,16 @@ def ecartDate(liste):
         if i % limite_ecart_jour == 0: new_liste.append(liste[i])
     return new_liste
 
+
 #Début du script
 fichier = open(nom_fichier,"r")                                                 #Ouvre le fichier
 ligne_descripteurs = fichier.readline()
 lst_descripteurs = ligne_descripteurs.rstrip().rsplit(";")                      #Sépare la première ligne (titres des colonnes) du reste des valeurs numériques
 lignes = fichier.readlines()                                                    #Le reste est entreposée dans "lignes"
 table = []
-donnees_racourcies = False
 
-suppressionDate = False                                                         #Par défaut, ne pas demander de limiter le nombre de dates
+empecher_valeurs_previsionnelles = False                                        #Par défaut, ne pas empêcher de tracer les valeurs prévisionnelles
+limite_date_debut_existe = False                                                #Par défaut, ne pas supprimer des dates sans vérifier que la limite de début existe
 
 for ligne in lignes:
     lst = ligne.rstrip().split(";")
@@ -85,18 +69,18 @@ for ligne in lignes:
     lst[4] = float(lst[4])                                                      #Conversion du taux de primo-vaccinés en nombre entier
     lst[5] = float(lst[5])                                                      #Conversion du taux de vaccinés en nombre entier
     table.append(lst)
-    if lst[1] == limite_date_debut: suppressionDate = True                      #Limiter le nombre de dates si la limite existe dans le fichier
+    if lst[1] == limite_date_debut: limite_date_debut_existe = True             #Limiter le nombre de dates si la limite existe dans le fichier
 fichier.close()                                                                 #Ferme le fichier
 table = sorted(table, key=itemgetter(1, 0))                                     #Tri les données par date, puis par âge
 
-#Tant que la date limite n'est pas atteinte, continuer de supprimer les données
-while suppressionDate and table[0][1] != limite_date_debut: del table[0]
+#Tant que la date limite de début n'est pas atteinte et si elle existe, continuer de supprimer les données
+while limite_date_debut_existe and table[0][1] != limite_date_debut: del table[0]
 
-#Vérifie la présense de données du 1er Septembre ou plus
+#Vérifie la présense de données de données ultérieurs à la date limite de fin
 for i in range(len(table)):
     if table[i][1] == limite_date_fin:                                          #Si c'est le cas...
         del table[i+15:]                                                        #Supprime ces données
-        donnees_racourcies = True                                               #Empeche la signalisation des valeurs prévisionelles
+        empecher_valeurs_previsionnelles = True                                 #Empeche la signalisation des valeurs prévisionelles (pas besoin)
         break
 
 #Initialisation des variables des dates et des 7 autres courbes
@@ -187,7 +171,8 @@ while i <= int((100-proportion_vaccines[-1])/coeff)+1 or len(liste_dates)%limite
     i += 1
     liste_dates.append(date)
 
-for i in range(len(liste_dates)): liste_dates[i] = formatDate(liste_dates[i])
+#Passe le format de toutes les dates : AAAA-MM-JJ -> JJ/MM
+for i in range(len(liste_dates)): liste_dates[i] = liste_dates[i][8:11]+"/"+liste_dates[i][5:7]
 
 liste_dates_reduite = ecartDate(reduction(liste_dates))                         #Reduit la liste de dates tout en conservant l'original
 
@@ -209,19 +194,19 @@ plt.plot(liste_dates_reduite, ecartDate(reduction(projectionObjectif(proportion_
 plt.plot(liste_dates_reduite, ecartDate(reduction(projectionObjectif(proportion_injections_completes_12_17_ans))), "purple", label = "12-17 ans vaccinés")
 
 #Trace une zone en gris clair délimitée par une ligne verticales en pointillé pour désigner les prédictions des courbes (si les données n'ont pas été raccourcis)
-if donnees_racourcies == False:
+if empecher_valeurs_previsionnelles == False:
     plt.axvline(x = liste_dates_reduite[position_date_limite//limite_ecart_jour], color = 'gray', linestyle = '--')
     plt.axvspan(liste_dates_reduite[position_date_limite//limite_ecart_jour], liste_dates_reduite[-1], alpha = 0.5, color = 'lightgray')
 
-plt.yticks(np.arange(0, 100.01, 10))                                            #Limite le maximum en y à 105% et force la création de jalons de 10%
-plt.ylim(0, 100.01)                                                             #Force le tableau à n'afficher y qu'entre 0% et 105%
+plt.yticks(np.arange(y_min, y_max+0.01, 10))                                    #Limite le maximum en y à 105% et force la création de jalons de 10%
+plt.ylim(y_min, y_max+0.01)                                                     #Force le tableau à n'afficher y qu'entre 0% et 105%
 
 plt.grid()                                                                      #Ajout d'un grillage
 plt.legend()                                                                    #Affiche les légendes associés à la courbe correspondante
 plt.margins(0, 0)                                                               #Force la disparition des marges intérieures
 
 #Défini les titres du graphe et des axes x et y
-plt.title(f"Avancement de la vaccination (Données du {nom_fichier[20:22]}/{nom_fichier[17:19]}/{nom_fichier[12:16]})")
+plt.title(f"Avancement de la vaccination (données du {nom_fichier[20:22]}/{nom_fichier[17:19]}/{nom_fichier[12:16]})")
 plt.xlabel("Dates")
 plt.ylabel("Pourcentage de vaccinés (%)")
 
