@@ -7,7 +7,7 @@ import numpy as np
 nom_fichier = "vacsi-a-fra-2021-08-06-20h05.csv"                                #Nom du fichier de données à traiter
 
 #Paramètres du graphique
-limite_date_debut = 0                                                           #Indique la première date des données (0 pour conserver la liste)
+limite_date_debut = "2021-01-01"                                                #Indique la première date des données (0 pour conserver la liste)
 limite_date_fin = 0                                                             #Exclure les données à partir d'une certaine date (0 pour conserver la liste)
 limite_nombre_jour = 0                                                          #Indique le nombre de dates à inscrire sur l'axe des abscisses (0 ou 1 conserve la liste)
 limite_ecart_jour = 7                                                           #Espace de n jours les dates
@@ -152,7 +152,8 @@ position_date_limite = len(liste_dates)-1                                       
 #Tant que la proportion de vaccinés n'est pas de 100%, étendre le graphique
 coeff = (proportion_vaccines[-1]-proportion_vaccines[-1-nb_jour_prediction])/nb_jour_prediction
 i = 0
-while i <= int((100-proportion_vaccines[-1])/coeff)+1 or len(liste_dates)%limite_ecart_jour !=0:
+#!!! Erreur avec limite_ecart_jour = 1
+while i <= int((100-proportion_vaccines[-1])/coeff)+1 or (len(liste_dates)-1)%limite_ecart_jour != 0:
     date = date[0:8] + str(int(date[8:])+1)
     if len(date[8:]) == 1: date = date[0:8] + "0" + date[-1] 
     if date[5:7] == "01" and date[8:10] == "32": date = date[0:5] + "02-01"
@@ -210,4 +211,5 @@ plt.title(f"Avancement de la vaccination (données du {nom_fichier[20:22]}/{nom_
 plt.xlabel("Dates")
 plt.ylabel("Pourcentage de vaccinés (%)")
 
-plt.savefig(f"Objectifs Vaccination {nom_fichier[12:22]}.png", bbox_inches = 'tight')         #Sauvegarde l'image avec la date des données et supprime et les marges exterieures
+#Sauvegarde l'image avec la date des données et supprime et les marges exterieures
+plt.savefig(f"Objectifs Vaccination {nom_fichier[12:22]}.png", bbox_inches = 'tight')
