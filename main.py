@@ -10,7 +10,7 @@ nom_fichier = "vacsi-a-fra-2021-08-06-20h05.csv"                                
 limite_date_debut = "2020-12-29"                                                #Indique la première date des données (0 pour conserver la liste)
 limite_date_fin = "2021-08-31"                                                  #Exclure les données à partir d'une certaine date (0 pour conserver la liste)
 limite_nombre_jour = 0                                                          #Indique le nombre de dates à inscrire sur l'axe des abscisses (0 ou 1 conserve la liste)
-limite_ecart_jour = 7                                                           #Espace de n jours les dates
+limite_ecart_jour = 7                                                           #Espace de n jours les dates (1 pour conserver la liste)
 nb_jour_prediction = 7                                                          #Fait des prévisions sur les jours suivants à partir des n derniers jours
 y_min = 0                                                                       #Définit le pourcentage minimum affiché
 y_max = 100                                                                     #Définit le pourcentage maximum affiché
@@ -31,7 +31,7 @@ pop_18_ans = 53761464                                                           
 
 #Sert à limiter une liste à limite_nombre_jour de manière uniforme
 def reduction(liste):
-    if limite_nombre_jour == 0 or limite_nombre_jour == 1: return liste         #limite_nombre_jour ne doit pas être égal à 0 ou 1
+    if limite_nombre_jour == 0 or limite_nombre_jour == 1: return liste         #limite_nombre_jour ne doit pas être égal à 0 ou 1 (risque d'erreur)
     liste_compressee = []
     coeff = len(liste)/(limite_nombre_jour-1)                                   #Calcule l'écart idéal entre 2 éléments de la liste à compresser
     liste_compressee.append(liste[0])                                           #Ajoute le premier élement de la liste à compresser
@@ -49,7 +49,6 @@ def projectionObjectif(liste):
 
 #Sert à espacer les dates selon limite_ecart_jour
 def ecartDate(liste):
-    if limite_ecart_jour == 0: return liste
     new_liste = []
     for i in range(len(liste)):
         if i % limite_ecart_jour == 0: new_liste.append(liste[i])
@@ -89,7 +88,7 @@ for i in range(len(table)):
     if table[i][1] == limite_date_fin:                                          #Si c'est le cas...
         del table[i+15:]                                                        #Supprime ces données
         empecher_valeurs_previsionnelles = True                                 #Empêche la signalisation des valeurs prévisionelles (pas besoin)
-        break
+        break                                                                   #Casse la boucle et empêche d'éventuelles erreurs
 
 #Initialisation des variables des dates et des 7 autres courbes
 liste_dates = []                                                                #Stocke la liste des dates en abscisse
@@ -107,6 +106,7 @@ cumul_primo_injections_18_ans = 0
 cumul_injections_completes_18_ans = 0
 cumul_primo_injections_50_ans = 0
 
+#Répartit les données dans les différentes listes
 for donnees in table:
     #Afin de faciliter la compréhension du code, les 6 colonnes sont assignés à des variables
     age = donnees[0]
