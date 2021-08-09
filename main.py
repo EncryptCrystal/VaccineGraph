@@ -210,4 +210,4 @@ plt.title(f"Avancement de la vaccination (données du {nom_fichier[20:22]}/{nom_
 plt.xlabel("Dates")
 plt.ylabel("Pourcentage de vaccinés (%)")
 
-plt.savefig(f"Tableau {nom_fichier[12:22]}.png", bbox_inches = 'tight')         #Sauvegarde l'image avec la date des données et supprime et les marges exterieures
+plt.savefig(f"Objectifs Vaccination {nom_fichier[12:22]}.png", bbox_inches = 'tight')         #Sauvegarde l'image avec la date des données et supprime et les marges exterieures
