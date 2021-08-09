@@ -106,7 +106,7 @@ proportion_vaccines = []                                                        
 cumul_primo_injections_18_ans = 0
 cumul_injections_completes_18_ans = 0
 cumul_primo_injections_50_ans = 0
-    
+
 for donnees in table:
     #Afin de faciliter la compréhension du code, les 6 colonnes sont assignés à des variables
     age = donnees[0]
@@ -205,5 +205,6 @@ plt.margins(0, 0)                                                               
 plt.title(f"État des objectifs gouvernementaux pour la fin août (données du {nom_fichier[20:22]}/{nom_fichier[17:19]}/{nom_fichier[12:16]})")
 plt.xlabel("Dates")
 plt.ylabel("Pourcentage atteint des objectifs (%)")
-    
-plt.savefig(f"Objectifs Gouvernement {nom_fichier[12:22]}.png", bbox_inches = 'tight')         #Sauvegarde l'image avec la date des données et supprime et les marges exterieures
+
+#Sauvegarde l'image avec la date des données et supprime et les marges exterieures
+plt.savefig(f"Objectifs Gouvernement {nom_fichier[12:22]}.png", bbox_inches = 'tight')
