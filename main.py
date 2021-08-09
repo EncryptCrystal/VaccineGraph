@@ -12,6 +12,7 @@ limite_date_fin = 0                                                             
 limite_nombre_jour = 0                                                          #Indique le nombre de dates à inscrire sur l'axe des abscisses (0 ou 1 conserve la liste)
 limite_ecart_jour = 7                                                           #Espace de n jours les dates
 nb_jour_prediction = 7                                                          #Fait des prévisions sur les jours suivants à partir des n derniers jours
+seuil_immunite_collective = 0.85                                                #Définit le seuil d'immunité collective (trace une ligne honrizontale à ce pourcentage)
 y_min = 0                                                                       #Définit le pourcentage minimum affiché
 y_max = 100                                                                     #Définit le pourcentage maximum affiché
 
@@ -152,8 +153,8 @@ position_date_limite = len(liste_dates)-1                                       
 #Tant que la proportion de vaccinés n'est pas de 100%, étendre le graphique
 coeff = (proportion_vaccines[-1]-proportion_vaccines[-1-nb_jour_prediction])/nb_jour_prediction
 i = 0
-#!!! Erreur avec limite_ecart_jour = 1
-while i <= int((100-proportion_vaccines[-1])/coeff)+1 or (len(liste_dates)-1)%limite_ecart_jour != 0:
+#!!! Pas 100% sûr de la formule (remplacer int par un arrondi à l'unité supérieure ?)
+while i <= int((100-proportion_vaccines[-1])/coeff) or (len(liste_dates)-1)%limite_ecart_jour != 0:
     date = date[0:8] + str(int(date[8:])+1)
     if len(date[8:]) == 1: date = date[0:8] + "0" + date[-1] 
     if date[5:7] == "01" and date[8:10] == "32": date = date[0:5] + "02-01"
@@ -181,6 +182,8 @@ liste_dates_reduite = ecartDate(reduction(liste_dates))                         
 #Début de la contruction du graphique
 plt.figure(figsize = (16, 5))                                                   #Définit une dimension en 16/5
 plt.tick_params(axis = 'x', rotation = 80)                                      #Tourne les dates à 80° afin qu'elles restent visibles
+
+#!!! Penser à ajouter une ligne verticale avec la variable seuil_immunite_collective
 
 #Trace les courbe
 plt.plot(liste_dates_reduite, ecartDate(reduction(projectionObjectif(proportion_primo_vaccines))), "red", label = "Français primo-vaccinés")
