@@ -54,6 +54,14 @@ def ecartDate(liste):
         if i % limite_ecart_jour == 0: new_liste.append(liste[i])
     return new_liste
 
+def formatNombre(nombre):
+    nombre = str(nombre)
+    j = 0
+    for i in range(1,len(nombre)):
+        if i%3 == 0:
+            nombre = nombre[:-i-j] + " " + nombre[-i-j:]
+            j += 1
+    return nombre
 
 #Début du script
 fichier = open(nom_fichier,"r")                                                 #Ouvre le fichier
@@ -203,7 +211,7 @@ plt.margins(0, 0)                                                               
 
 #Défini les titres du graphe et des axes x et y
 plt.title(f"État des objectifs gouvernementaux pour la fin août (données du {nom_fichier[20:22]}/{nom_fichier[17:19]}/{nom_fichier[12:16]})")
-plt.xlabel("Dates")
+plt.xlabel(f"Dates\n\nLes prévisions sont faites à partir des {formatNombre(nb_jour_prediction)} jours précédents. En considérant une population de +18 ans de {formatNombre(pop_18_ans)} habitants et de +50 ans de {formatNombre(pop_50_ans)} habitants (Insee, 2021).\nSource des données sur Data.gouv et code du graphique disponible sur https://github.com/A2drien/VaccineGraph.")
 plt.ylabel("Pourcentage atteint des objectifs (%)")
 
 #Sauvegarde l'image avec la date des données et supprime et les marges exterieures
