@@ -37,8 +37,8 @@ def reduction(liste):
     liste_compressee.append(liste[0])                                           #Ajoute le premier élement de la liste à compresser
     for i in range(len(liste)):
         if int(i/coeff) == len(liste_compressee):                               #Si la position de l'élément est supérieure ou égale à sa position dans la liste compressée
-            liste_compressee.append(liste[i-1])                                 #Alors ajouter l'élement à la liste compressée
-    liste_compressee.append(liste[-1])                                          #Ajoute le dernier élement de la liste dans la liste à compresser
+            liste_compressee.append(liste[i-1])                                 #Alors ajouter l'élément à la liste compressée
+    liste_compressee.append(liste[-1])                                          #Ajoute le dernier élément de la liste dans la liste à compresser
     return liste_compressee
 
 #Sert à la projection des courbes
@@ -73,8 +73,8 @@ for ligne in lignes:
     del lst[2]                                                                  #Suppression des injections complètes quotidiennes
     lst[2] = int(lst[2])                                                        #Conversion du cumul des primo-injections en nombre entier
     lst[3] = int(lst[3])                                                        #Conversion du cumul des injections complètes en nombre entier
-    lst[4] = float(lst[4])                                                      #Conversion du taux de primo-vaccinés en nombre entier
-    lst[5] = float(lst[5])                                                      #Conversion du taux de vaccinés en nombre entier
+    lst[4] = float(lst[4])                                                      #Conversion du taux de primo-vaccinés en nombre décimal
+    lst[5] = float(lst[5])                                                      #Conversion du taux de vaccinés en nombre décimal
     table.append(lst)
     if lst[1] == limite_date_debut: limite_date_debut_existe = True             #Limiter le nombre de dates si la limite existe dans le fichier
 fichier.close()                                                                 #Ferme le fichier
@@ -173,7 +173,7 @@ while liste_dates[-1] != limite_date_fin and limite_date_fin != 0:
 #Passe le format de toutes les dates : AAAA-MM-JJ -> JJ/MM
 for i in range(len(liste_dates)): liste_dates[i] = liste_dates[i][8:11]+"/"+liste_dates[i][5:7]
 
-liste_dates_reduite = ecartDate(reduction(liste_dates))                         #Reduit la liste de dates tout en conservant l'original
+liste_dates_reduite = ecartDate(reduction(liste_dates))                         #Réduit la liste de dates tout en conservant l'original
 
 
 #Début de la contruction du graphique
