@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-nom_fichier = "vacsi-a-fra-2021-08-06-20h05.csv"                                #Nom du fichier de données à traiter
+nom_fichier = "vacsi-a-fra-2021-08-09-19h05.csv"                                #Nom du fichier de données à traiter
 
 #Paramètres du graphique
 limite_date_debut = "2021-01-01"                                                #Indique la première date des données (0 pour conserver la liste)
@@ -172,6 +172,7 @@ while i <= int((100-proportion_vaccines[-1])/coeff) or (len(liste_dates)-1)%limi
     elif date[5:7] == "12" and date[8:10] == "32": date = str(int(date[0:4])+1) + "-01-01"
     i += 1
     liste_dates.append(date)
+    if date == limite_date_fin: break
 
 #Passe le format de toutes les dates : AAAA-MM-JJ -> JJ/MM
 for i in range(len(liste_dates)): liste_dates[i] = liste_dates[i][8:11]+"/"+liste_dates[i][5:7]
