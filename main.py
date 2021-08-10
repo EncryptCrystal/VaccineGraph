@@ -47,6 +47,14 @@ def ecartDate(liste):
         if i % limite_ecart_jour == 0: new_liste.append(liste[i])
     return new_liste
 
+def formatNombre(nombre):
+    nombre = str(nombre)
+    j = 0
+    for i in range(1,len(nombre)):
+        if i%3 == 0:
+            nombre = nombre[:-i-j] + " " + nombre[-i-j:]
+            j += 1
+    return nombre
 
 #Début du script
 fichier = open(nom_fichier,"r")                                                 #Ouvre le fichier
@@ -153,8 +161,9 @@ position_date_limite = len(liste_dates)-1                                       
 #Tant que la proportion de vaccinés n'est pas de 100%, étendre le graphique
 coeff = (proportion_vaccines[-1]-proportion_vaccines[-1-nb_jour_prediction])/nb_jour_prediction
 i = 0
+limite_atteinte = False
 #!!! Pas 100% sûr de la formule (remplacer int par un arrondi à l'unité supérieure ?)
-while i <= int((100-proportion_vaccines[-1])/coeff) or (len(liste_dates)-1)%limite_ecart_jour != 0:
+while (limite_date_fin == 0 and (i <= int((100-proportion_vaccines[-1])/coeff) or (len(liste_dates)-1)%limite_ecart_jour != 0)) or (limite_atteinte and (len(liste_dates)-1)%limite_ecart_jour != 0):
     date = date[0:8] + str(int(date[8:])+1)
     if len(date[8:]) == 1: date = date[0:8] + "0" + date[-1] 
     if date[5:7] == "01" and date[8:10] == "32": date = date[0:5] + "02-01"
@@ -172,7 +181,7 @@ while i <= int((100-proportion_vaccines[-1])/coeff) or (len(liste_dates)-1)%limi
     elif date[5:7] == "12" and date[8:10] == "32": date = str(int(date[0:4])+1) + "-01-01"
     i += 1
     liste_dates.append(date)
-    if date == limite_date_fin: break
+    if date == limite_date_fin: limite_atteinte = True
 
 #Passe le format de toutes les dates : AAAA-MM-JJ -> JJ/MM
 for i in range(len(liste_dates)): liste_dates[i] = liste_dates[i][8:11]+"/"+liste_dates[i][5:7]
@@ -212,7 +221,9 @@ plt.margins(0, 0)                                                               
 
 #Défini les titres du graphe et des axes x et y
 plt.title(f"Avancement de la vaccination (données du {nom_fichier[20:22]}/{nom_fichier[17:19]}/{nom_fichier[12:16]})")
-plt.xlabel("Dates")
+plt.xlabel(f"""Dates\n\nLes prévisions sont faites à partir des {formatNombre(nb_jour_prediction)} jours précédents. En considérant une population de 18-49 ans de {formatNombre(pop_18_49_ans)} habitants et de 50-79 ans de {formatNombre(pop_50_79_ans)} habitants (Insee, 2021).
+Les autres classes d'âge utilisent les données fournies avec celles de la vaccination en France.
+Source des données sur Data.gouv et code du graphique disponible sur https://github.com/A2drien/VaccineGraph.""")
 plt.ylabel("Pourcentage de vaccinés (%)")
 
 #Sauvegarde l'image avec la date des données et supprime et les marges exterieures
