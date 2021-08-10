@@ -219,10 +219,10 @@ plt.grid()                                                                      
 plt.legend()                                                                    #Affiche les légendes associés à la courbe correspondante
 plt.margins(0, 0)                                                               #Force la disparition des marges intérieures
 
-#Défini les titres du graphe et des axes x et y
+#Défini les titres du graphe et des axes x et y, et ajoute des notes en bas du graphe
 plt.title(f"Avancement de la vaccination (données du {nom_fichier[20:22]}/{nom_fichier[17:19]}/{nom_fichier[12:16]})")
 plt.xlabel(f"""Dates\n\nLes prévisions sont faites à partir des {formatNombre(nb_jour_prediction)} jours précédents. En considérant une population de 18-49 ans de {formatNombre(pop_18_49_ans)} habitants et de 50-79 ans de {formatNombre(pop_50_79_ans)} habitants (Insee, 2021).
-Les autres classes d'âge utilisent les données fournies avec celles de la vaccination en France.
+Les autres classes d'âge utilisent les données fournies avec celles de la vaccination (en proportion et par âge) en France.
 Source des données sur Data.gouv et code du graphique disponible sur https://github.com/A2drien/VaccineGraph.""")
 plt.ylabel("Pourcentage de vaccinés (%)")
 
