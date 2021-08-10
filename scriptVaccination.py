@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-nom_fichier = "vacsi-a-fra-2021-08-09-19h05.csv"                                #Nom du fichier de données à traiter
+nom_fichier = "vacsi-a-fra-2021-08-10-19h05.csv"                                #Nom du fichier de données à traiter
 
 #Paramètres du graphique
 limite_date_debut = "2021-01-01"                                                #Indique la première date des données (0 pour conserver la liste)
@@ -193,7 +193,8 @@ liste_dates_reduite = ecartDate(reduction(liste_dates))                         
 plt.figure(figsize = (16, 5))                                                   #Définit une dimension en 16/5
 plt.tick_params(axis = 'x', rotation = 80)                                      #Tourne les dates à 80° afin qu'elles restent visibles
 
-#!!! Penser à ajouter une ligne verticale avec la variable seuil_immunite_collective
+#Trace une ligne de pointillé verticale au niveau des 100%
+plt.axhline(y = 100 * seuil_immunite_collective, color = 'black', linestyle = '--')
 
 #Trace les courbe
 plt.plot(liste_dates_reduite, ecartDate(reduction(projectionObjectif(proportion_primo_vaccines))), "red", label = "Français primo-vaccinés")
