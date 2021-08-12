@@ -12,7 +12,7 @@ limite_date_fin = 0                                                             
 limite_nombre_jour = 0                                                          #Indique le nombre de dates à inscrire sur l'axe des abscisses (0 ou 1 conserve la liste)
 limite_ecart_jour = 7                                                           #Espace de n jours les dates (1 pour conserver la liste)
 nb_jour_prediction = 7                                                          #Fait des prévisions sur les jours suivants à partir des n derniers jours
-seuil_immunite_collective = 0.85                                                #Définit le seuil d'immunité collective (trace une ligne honrizontale à ce pourcentage)
+seuil_immunite_collective = 0.90                                                #Définit le seuil d'immunité collective (trace une ligne honrizontale à ce pourcentage)
 y_min = 0                                                                       #Définit le pourcentage minimum affiché
 y_max = 100                                                                     #Définit le pourcentage maximum affiché
 
@@ -191,6 +191,7 @@ plt.figure(figsize = (16, 5))                                                   
 plt.tick_params(axis = 'x', rotation = 80)                                      #Tourne les dates à 80° afin qu'elles restent visibles
 
 #Trace une ligne de pointillé verticale au niveau des 100%
+plt.text(len(liste_dates_reduite)/2, 100 *seuil_immunite_collective + 2, f"Seuil d'immunité collective ({int(seuil_immunite_collective*100)}%)", horizontalalignment = 'center')
 plt.axhline(y = 100 * seuil_immunite_collective, color = 'black', linestyle = '--')
 
 #Trace les courbe
