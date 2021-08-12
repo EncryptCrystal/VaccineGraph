@@ -160,7 +160,7 @@ coeff = (proportion_vaccines[-1]-proportion_vaccines[-1-nb_jour_prediction])/nb_
 i = 0
 limite_atteinte = False
 #!!! Pas 100% sûr de la formule (remplacer int par un arrondi à l'unité supérieure ?)
-while (limite_date_fin == 0 and (i <= int((100-proportion_vaccines[-1])/coeff) or (len(liste_dates)-1)%limite_ecart_jour != 0)) or (limite_atteinte == False or (len(liste_dates)-1)%limite_ecart_jour != 0):
+while (limite_date_fin == 0 and (i <= int((100-proportion_vaccines[-1])/coeff) or (len(liste_dates)-1)%limite_ecart_jour != 0)) and (limite_atteinte == False or (len(liste_dates)-1)%limite_ecart_jour != 0):
     date = date[0:8] + str(int(date[8:])+1)
     if len(date[8:]) == 1: date = date[0:8] + "0" + date[-1] 
     if date[5:7] == "01" and date[8:10] == "32": date = date[0:5] + "02-01"
@@ -217,8 +217,8 @@ plt.margins(0, 0)                                                               
 
 #Défini les titres du graphe et des axes x et y, et ajoute des notes en bas du graphe
 plt.title(f"Avancement de la vaccination (données du {nom_fichier[20:22]}/{nom_fichier[17:19]}/{nom_fichier[12:16]})")
-plt.xlabel(f"""Dates\n\nLes prévisions sont faites à partir des {formatNombre(nb_jour_prediction)} jours précédents. En considérant une population de 18-49 ans de {formatNombre(pop_18_59_ans)} habitants et de 50-79 ans de {formatNombre(pop_60_ans)} habitants (Insee, 2021).
-Les autres classes d'âge utilisent les données fournies avec celles de la vaccination (en proportion et par âge) en France.
+plt.xlabel(f"""Dates\n\nLes prévisions sont faites à partir des {formatNombre(nb_jour_prediction)} jours précédents. En considérant une population de 18-59 ans de {formatNombre(pop_18_59_ans)} habitants et de +60 ans de {formatNombre(pop_60_ans)} habitants (Insee, 2021).
+La proportion de 12-17 ans est fournie par le même fichier actuellement utilisé pour connaître l'état de la vaccination par tranche d'âge en France.
 Source des données sur Data.gouv et code du graphique disponible sur https://github.com/A2drien/VaccineGraph.""")
 plt.ylabel("Pourcentage de vaccinés (%)")
 
