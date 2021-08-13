@@ -47,6 +47,7 @@ def ecartDate(liste):
         if i % limite_ecart_jour == 0: new_liste.append(liste[i])
     return new_liste
 
+#Sert à espacer un nombre par milliers, millions...
 def formatNombre(nombre):
     nombre = str(nombre)
     j = 0
@@ -159,8 +160,7 @@ position_date_limite = len(liste_dates)-1                                       
 coeff = (proportion_vaccines[-1]-proportion_vaccines[-1-nb_jour_prediction])/nb_jour_prediction
 i = 0
 limite_atteinte = False
-#!!! Pas 100% sûr de la formule (remplacer int par un arrondi à l'unité supérieure ?)
-while (limite_date_fin == 0 and (i <= int((100-proportion_vaccines[-1])/coeff) or (len(liste_dates)-1)%limite_ecart_jour != 0)) and (limite_atteinte == False or (len(liste_dates)-1)%limite_ecart_jour != 0):
+while (limite_date_fin == 0 and (i <= (100-proportion_vaccines[-1]) /coeff or ( len(liste_dates)-1) % limite_ecart_jour != 0) ) and (limite_atteinte == False or (len(liste_dates)-1)%limite_ecart_jour != 0):
     date = date[0:8] + str(int(date[8:])+1)
     if len(date[8:]) == 1: date = date[0:8] + "0" + date[-1] 
     if date[5:7] == "01" and date[8:10] == "32": date = date[0:5] + "02-01"
