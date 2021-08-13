@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-nom_fichier = "vacsi-a-fra-2021-08-12-19h05.csv"                                #Nom du fichier de données à traiter
+nom_fichier = "vacsi-a-fra-2021-08-13-19h09.csv"                                #Nom du fichier de données à traiter
 
 #Paramètres du graphique
 limite_date_debut = "2021-01-01"                                                #Indique la première date des données (0 pour conserver la liste)
@@ -160,7 +160,7 @@ coeff = (proportion_vaccines[-1]-proportion_vaccines[-1-nb_jour_prediction])/nb_
 i = 0
 limite_atteinte = False
 #!!! Pas 100% sûr de la formule (remplacer int par un arrondi à l'unité supérieure ?)
-while (limite_date_fin == 0 and (i <= int((100-proportion_vaccines[-1])/coeff) or (len(liste_dates)-1)%limite_ecart_jour != 0)) or (limite_atteinte == False or (len(liste_dates)-1)%limite_ecart_jour != 0):
+while (limite_date_fin == 0 and (i <= int((100-proportion_vaccines[-1])/coeff) or (len(liste_dates)-1)%limite_ecart_jour != 0)) and (limite_atteinte == False or (len(liste_dates)-1)%limite_ecart_jour != 0):
     date = date[0:8] + str(int(date[8:])+1)
     if len(date[8:]) == 1: date = date[0:8] + "0" + date[-1] 
     if date[5:7] == "01" and date[8:10] == "32": date = date[0:5] + "02-01"
@@ -191,8 +191,10 @@ plt.figure(figsize = (16, 5))                                                   
 plt.tick_params(axis = 'x', rotation = 80)                                      #Tourne les dates à 80° afin qu'elles restent visibles
 
 #Trace une ligne de pointillé verticale au niveau des 100%
-plt.text(len(liste_dates_reduite)/2, 100 *seuil_immunite_collective + 2, f"Seuil d'immunité collective ({int(seuil_immunite_collective*100)}%)", horizontalalignment = 'center')
 plt.axhline(y = 100 * seuil_immunite_collective, color = 'black', linestyle = '--')
+
+#Trace une ligne de pointillé horizontale indiquant le seuil d'immunité colllective
+plt.text(len(liste_dates_reduite)/2, 100 *seuil_immunite_collective + 2, f"Seuil d'immunité collective ({int(seuil_immunite_collective*100)}%)", horizontalalignment = 'center')
 
 #Trace les courbe
 plt.plot(liste_dates_reduite, ecartDate(reduction(projectionObjectif(proportion_primo_vaccines))), "red", label = "Français primo-vaccinés")
