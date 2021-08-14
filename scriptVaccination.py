@@ -162,7 +162,7 @@ i = 0
 limite_atteinte = False
 #Si il n'y a pas de date limite de fin, alors créer des dates jusqu'à ce que les 100% de vaccinés soient atteints et/ou dépassés ET que la limite d'écart entre les dates soit respecté
 #Sinon, alors créer des dates jusqu'à ce que la date limite soit atteinte et/ou dépassée ET que la limite d'écart entre les dates soit respecté
-while (limite_date_fin == 0 and (i <= (100-proportion_vaccines[-1]) /coeff or ( len(liste_dates)-1) % limite_ecart_jour != 0) ) and (limite_atteinte == False or (len(liste_dates)-1)%limite_ecart_jour != 0):
+while (limite_date_fin == 0 and (i <= (100-proportion_vaccines[-1]) /coeff or ( len(liste_dates)-1) % limite_ecart_jour != 0) ) or (limite_atteinte == False and (len(liste_dates)-1)%limite_ecart_jour != 0):
     date = date[0:8] + str(int(date[8:])+1)
     if len(date[8:]) == 1: date = date[0:8] + "0" + date[-1] 
     if date[5:7] == "01" and date[8:10] == "32": date = date[0:5] + "02-01"
