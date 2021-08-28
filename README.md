@@ -1,7 +1,7 @@
 <p align="center">Graphique prédisant la vaccination en France dans les semaines à venir.
 <br>
 <br>
-<a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/license-MIT-blue.svg"></a>
+<a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/Licence-MIT-blue.svg"></a>
 </p>
 
 <p align="center">
