@@ -8,24 +8,26 @@ nom_fichier = "vacsi-a-fra-2021-08-26-19h10.csv"                                
 
 #Paramètres du graphique
 limite_date_debut = "2021-01-01"                                                #Indique la première date des données (0 pour conserver la liste)
-limite_date_fin = 0                                                             #Exclure les données à partir d'une certaine date (0 pour conserver la liste)
+limite_date_fin = "2021-11-12"                                                             #Exclure les données à partir d'une certaine date (0 pour conserver la liste)
 limite_nombre_jour = 0                                                          #Indique le nombre de dates à inscrire sur l'axe des abscisses (0 ou 1 conserve la liste)
-limite_ecart_jour = 1                                                           #Espace de n jours les dates (1 pour conserver la liste)
+limite_ecart_jour = 7                                                           #Espace de n jours les dates (1 pour conserver la liste)
 nb_jour_prediction = 7                                                          #Fait des prévisions sur les jours suivants à partir des n derniers jours
 seuil_immunite_collective = 0.90                                                #Définit le seuil d'immunité collective (trace une ligne honrizontale à ce pourcentage)
 y_min = 0                                                                       #Définit le pourcentage minimum affiché
 y_max = 100                                                                     #Définit le pourcentage maximum affiché
 
-#Données sur la population (Insee, 2021) (https://www.insee.fr/fr/outil-interactif/5367857/details/20_DEM/21_POP/21C_Figure3#)
-liste_courbes_demandees = [ ( 0, 80, 1, "red"),
-                            ( 0, 80, 2, "brown"),
-                            (60, 80, 1, "cyan"),
-                            (60, 80, 2, "darkblue"),
-                            (18, 59, 1, "yellow"),
-                            (18, 59, 2, "orange"),
-                            (12, 17, 1, "lawngreen"),
-                            (12, 17, 2, "darkgreen")]
+#Liste des courbes demandées, en format (age minimal, age maximal, nb de doses, couleur du tracé)
+liste_courbes = [   ( 0, 80, 1, "red"),
+                    ( 0, 80, 2, "brown"),
+                    (60, 80, 1, "cyan"),
+                    (60, 80, 2, "darkblue"),
+                    (18, 59, 1, "yellow"),
+                    (18, 59, 2, "orange"),
+                    (12, 17, 1, "lawngreen"),
+                    (12, 17, 2, "darkgreen")]
 
+#Données sur la population (Insee, 2021) (https://www.insee.fr/fr/outil-interactif/5367857/details/20_DEM/21_POP/21C_Figure3#)
+#Format : (age minimal conserné, population de la tranche d'âge)
 liste_donnees_population = [( 0, 3632671),
                             ( 5, 4069407),
                             (10, 1703491),
@@ -35,7 +37,8 @@ liste_donnees_population = [( 0, 3632671),
                             (30, 8279647),
                             (40, 8572773),
                             (50, 8814162),
-                            (60, 8000727),
+                            (60, 4125693),
+                            (65, 3875034),
                             (70, 3680309),
                             (75, 2276900),
                             (80, 4132668)]
@@ -64,6 +67,21 @@ def ecartDate(liste):
     for i in range(len(liste)):
         if i % limite_ecart_jour == 0: new_liste.append(liste[i])
     return new_liste
+
+#Sert à séparer les nombres par milliers, millions...
+def formatNombre(nombre):
+    nombre = str(nombre)
+    j = 0
+    for i in range(1,len(nombre)):
+        if i%3 == 0:
+            nombre = nombre[:-i-j] + " " + nombre[-i-j:]
+            j += 1
+    return nombre
+
+def analyseListeDonnees(liste_date, liste_donnees):
+    for liste in liste_donnees:
+        if len(liste) != len(liste_dates) or liste[-1] < 100: return False
+    return True
 
 #Début du script
 fichier = open(nom_fichier,"r")                                                 #Ouvre le fichier
@@ -104,7 +122,7 @@ for i in range(len(table)):
 liste_dates = []                                                                #Stocke la liste des dates en abscisse
 
 liste_donnees = []
-for i in range(26): liste_donnees.append([])
+for i in range(28): liste_donnees.append([])
 
 #Répartit les données dans les différentes listes
 for donnees in table:
@@ -154,26 +172,74 @@ for donnees in table:
         liste_donnees[16].append(primo_injections)
         liste_donnees[17].append(injections_completes)
     
-    elif age == 69:
+    elif age == 64:
         liste_donnees[18].append(primo_injections)
         liste_donnees[19].append(injections_completes)
-    
-    elif age == 74:
+
+    elif age == 69:
         liste_donnees[20].append(primo_injections)
         liste_donnees[21].append(injections_completes)
     
-    elif age == 79:
+    elif age == 74:
         liste_donnees[22].append(primo_injections)
         liste_donnees[23].append(injections_completes)
     
-    else:
+    elif age == 79:
         liste_donnees[24].append(primo_injections)
         liste_donnees[25].append(injections_completes)
+    
+    else:
+        liste_donnees[26].append(primo_injections)
+        liste_donnees[27].append(injections_completes)
 
 
 position_date_limite = len(liste_dates)-1                                       #Sauvegarde de la position du dernier jour dont on a les données
 
-"""#Tant que la proportion de vaccinés n'est pas de 100%, étendre le graphique
+#Passe le format de toutes les dates : AAAA-MM-JJ -> JJ/MM
+for i in range(len(liste_dates)): liste_dates[i] = liste_dates[i][8:11]+"/"+liste_dates[i][5:7]
+
+liste_dates_reduite = ecartDate(reduction(liste_dates))                         #éeduit la liste de dates tout en conservant l'original
+
+
+#Début de la contruction du graphique
+plt.figure(figsize = (16, 5))                                                   #Définit une dimension en 16/5
+plt.tick_params(axis = 'x', rotation = 80)                                      #Tourne les dates à 80° afin qu'elles restent visibles
+
+
+#Trace les courbes
+for courbe in liste_courbes:                                                    #On prend une à une les courbes demandées
+    courbe_finale = [0]*len(liste_donnees[0])                                   #Contient le nombre final d'injection pour la tranche d'âge demandée
+    population_totale = 0
+    liste_age = []                                                              #Contient les différentes tranches d'âge utilisées
+    for position_age in range(len(liste_donnees_population)):                   #On balaye la liste de données de population pour savoir si l'âge correspond à la demande, et si c'est le cas :
+        if courbe[0] <= liste_donnees_population[position_age][0] < courbe[1] or liste_donnees_population[position_age][0] == 80 == courbe[1]:
+            population_totale += liste_donnees_population[position_age][1]      #Ajouter la population sélectionnée au total de population consernée
+            liste_age.append(liste_donnees_population[position_age][0])         #Ajouter à la liste des âges utilisées l'âge minimum utilisé
+            for i in range(len(liste_donnees[0])):                              #Additionner les injections à la courbe totale, en prenant en compte la distanction primo-injection/injecction finale
+                courbe_finale[i] += liste_donnees[position_age*2+courbe[2]-1][i]
+    
+    #Les données passent du nombre d'injection au pourcentage de population
+    for i in range(len(courbe_finale)): courbe_finale[i] = 100*courbe_finale[i]/population_totale
+
+    #Si l'âge maximal n'est pas 18 ans, recherchez quelle est la classe d'âge supérieure, et y retirer 1
+    if liste_age[-1] != 80:
+        for i in range(len(liste_donnees_population)):
+            if liste_donnees_population[i][0] == liste_age[-1]:
+                liste_age.append(liste_donnees_population[i+1][0]-1)
+    
+    if liste_age[0] == 0 and liste_age[-1] == 80: titre = "Français"            #Si la part d'âge demandée couvre l'ensemble des Français, alors mettre "Français" dans le titre
+    elif liste_age[-1] == 80: titre = f"+{liste_age[0]} ans"                    #Sinon, si la tranche d'âge demandée va jusqu'à l'âge maximal, mettre "+[âge minimal]" dans le titre
+    else: titre = f"{liste_age[0]}-{liste_age[-1]} ans"                         #Sinon, mettre "[âge minimal]-[âge maximal]" dans le titre
+    
+    if courbe[2] == 1: titre += " primo-vaccinés"
+    else: titre += " vaccinés"
+    
+    couleur = courbe[3]
+    
+    plt.plot(liste_dates_reduite, ecartDate(reduction(projectionObjectif(courbe_finale))), couleur, label = titre)
+
+"""
+#Tant que la proportion de vaccinés n'est pas de 100%, étendre le graphique
 #!!!
 coeff = (proportion_vaccines[-1]-proportion_vaccines[-1-nb_jour_prediction])/nb_jour_prediction
 i = 0
@@ -200,15 +266,6 @@ while (limite_date_fin == 0 and (i <= (100-proportion_vaccines[-1]) /coeff or ( 
     liste_dates.append(date)
     if date == limite_date_fin: limite_atteinte = True
 """
-#Passe le format de toutes les dates : AAAA-MM-JJ -> JJ/MM
-for i in range(len(liste_dates)): liste_dates[i] = liste_dates[i][8:11]+"/"+liste_dates[i][5:7]
-
-liste_dates_reduite = ecartDate(reduction(liste_dates))                         #éeduit la liste de dates tout en conservant l'original
-
-
-#Début de la contruction du graphique
-plt.figure(figsize = (16, 5))                                                   #Définit une dimension en 16/5
-plt.tick_params(axis = 'x', rotation = 80)                                      #Tourne les dates à 80° afin qu'elles restent visibles
 
 #Trace une ligne de pointillé verticale au niveau des 100% si le seuil d'immunité collective n'est pas égal à 0
 if seuil_immunite_collective != 0: plt.axhline(y = 100 * seuil_immunite_collective, color = 'black', linestyle = '--')
@@ -223,40 +280,6 @@ if empecher_valeurs_previsionnelles == False:
 
 plt.yticks(np.arange(y_min, y_max+0.01, 10))                                    #Limite le maximum en y à 105% et force la création de jalons de 10%
 plt.ylim(y_min, y_max+0.01)                                                     #Force le tableau à n'afficher y qu'entre 0% et 105%
-
-
-#Trace les courbes
-for courbe_demandée in liste_courbes_demandees:                                 #On prend une à une les courbes demandées
-    courbe_finale = [0]*len(liste_donnees[0])                                   #Contient le nombre final d'injection pour la tranche d'âge demandée
-    population_totale = 0
-    liste_age = []                                                              #Contient les différentes tranches d'âge utilisées
-    for position_age in range(len(liste_donnees_population)):                   #On balaye la liste de données de population pour savoir si l'âge correspond à la demande, et si c'est le cas :
-        if courbe_demandée[0] <= liste_donnees_population[position_age][0] < courbe_demandée[1] or liste_donnees_population[position_age][0] == 80 == courbe_demandée[1]:
-            population_totale += liste_donnees_population[position_age][1]      #Ajouter la population sélectionnée au total de population consernée
-            liste_age.append(liste_donnees_population[position_age][0])         #Ajouter à la liste des âges utilisées l'âge minimum utilisé
-            for i in range(len(liste_donnees[0])):                              #Additionner les injections à la courbe totale, en prenant en compte la distanction primo-injection/injecction finale
-                courbe_finale[i] += liste_donnees[position_age*2+courbe_demandée[2]-1][i]
-    
-    #Les données passent du nombre d'injection au pourcentage de population
-    for i in range(len(courbe_finale)): courbe_finale[i] = 100*courbe_finale[i]/population_totale
-
-    #Si l'âge maximal n'est pas 18 ans, recherchez quelle est la classe d'âge supérieure, et y retirer 1
-    if liste_age[-1] != 80:
-        for i in range(len(liste_donnees_population)):
-            if liste_donnees_population[i][0] == liste_age[-1]:
-                liste_age.append(liste_donnees_population[i+1][0]-1)
-    
-    if liste_age[0] == 0 and liste_age[-1] == 80: titre = "Français"            #Si la part d'âge demandée couvre l'ensemble des Français, alors mettre "Français" dans le titre
-    elif liste_age[-1] == 80: titre = f"+{liste_age[0]} ans"                    #Sinon, si la tranche d'âge demandée va jusqu'à l'âge maximal, mettre "+[âge minimal]" dans le titre
-    else: titre = f"{liste_age[0]}-{liste_age[-1]} ans"                         #Sinon, mettre "[âge minimal]-[âge maximal]" dans le titre
-    
-    if courbe_demandée[2] == 1: titre += " primo-vaccinés"
-    else: titre += " vaccinés"
-    
-    couleur = courbe_demandée[3]
-    
-    plt.plot(liste_dates_reduite[:-1], ecartDate(reduction(projectionObjectif(courbe_finale)))[:-1], couleur, label = titre)
-
 
 plt.grid()                                                                      #Ajout d'un grillage
 plt.legend()                                                                    #Affiche les légendes associés à la courbe correspondante
