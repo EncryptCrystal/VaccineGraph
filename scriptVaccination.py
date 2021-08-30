@@ -243,7 +243,6 @@ for courbe in liste_courbes:                                                    
 
 liste_coeff = []
 numero_passage_courbe = 0
-liste_limite_atteinte = [False]*len(liste_courbes)
 
 #Ajout des différents coeffs dans la liste adéquate
 for i in range(len(liste_courbes)): liste_coeff.append((liste_courbes[i][-1]-liste_courbes[i][-1-nb_jour_prediction])/nb_jour_prediction)
@@ -251,7 +250,7 @@ for i in range(len(liste_courbes)): liste_coeff.append((liste_courbes[i][-1]-lis
 #Tant que la proportion de vaccinés n'est pas de 100%, étendre le graphique
 #Si il n'y a pas de date limite de fin, alors créer des dates jusqu'à ce que les 100% de vaccinés soient atteints et/ou dépassés ET que la limite d'écart entre les dates soit respecté
 #Sinon, alors créer des dates jusqu'à ce que la date limite soit atteinte et/ou dépassée ET que la limite d'écart entre les dates soit respecté
-while analyseListeDonnees(liste_dates, liste_courbes) or ((limite_date_fin == 0 and (liste_courbes[numero_passage_courbe][-1] < 100 or ( len(liste_courbes[numero_passage_courbe])-1) % limite_ecart_jour != 0) )   or   (liste_limite_atteinte[numero_passage_courbe] == False and (len(liste_courbes[numero_passage_courbe])-1)%limite_ecart_jour != 0)):
+while analyseListeDonnees(liste_dates, liste_courbes) or ((limite_date_fin == 0 and (liste_courbes[numero_passage_courbe][-1] < 100 or ( len(liste_courbes[numero_passage_courbe])-1) % limite_ecart_jour != 0) )   or   (limite_date_fin != 0 and (limite_date_fin not in liste_dates or len(liste_dates) != len(liste_courbes[numero_passage_courbe]) or (len(liste_courbes[numero_passage_courbe])-1)%limite_ecart_jour != 0))):
     liste_courbes[numero_passage_courbe].append(liste_courbes[numero_passage_courbe][-1]+liste_coeff[numero_passage_courbe])
     if len(liste_courbes[numero_passage_courbe]) > len(liste_dates):
             date = date[0:8] + str(int(date[8:])+1)
@@ -270,7 +269,6 @@ while analyseListeDonnees(liste_dates, liste_courbes) or ((limite_date_fin == 0 
             elif date[5:7] == "11" and date[8:10] == "31": date = date[0:5] + "12-01"
             elif date[5:7] == "12" and date[8:10] == "32": date = str(int(date[0:4])+1) + "-01-01"
             liste_dates.append(date)
-    if date == limite_date_fin: liste_limite_atteinte[numero_passage_courbe] = True
     numero_passage_courbe = (numero_passage_courbe + 1)%len(liste_courbes)
 
 #Passe le format de toutes les dates : AAAA-MM-JJ -> JJ/MM
