@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-nom_fichier = "vacsi-a-fra-2021-08-27-19h09.csv"                                #Nom du fichier de données à traiter
+nom_fichier = "vacsi-a-fra-2021-08-30-19h05.csv"                                #Nom du fichier de données à traiter
 
 #Paramètres du graphique
 limite_date_debut = "2021-01-01"                                                #Indique la première date des données (0 pour conserver la liste)
@@ -196,7 +196,7 @@ plt.tick_params(axis = 'x', rotation = 80)                                      
 plt.axhline(y = 100 * seuil_immunite_collective, color = 'black', linestyle = '--')
 
 #Trace une ligne de pointillé horizontale indiquant le seuil d'immunité colllective
-plt.text(len(liste_dates_reduite)/2, 100 *seuil_immunite_collective + 2, f"Seuil d'immunité collective ({int(seuil_immunite_collective*100)}%)", horizontalalignment = 'center')
+plt.text(len(liste_dates_reduite)/2, 100 *seuil_immunite_collective + 1.2, f"Seuil d'immunité collective ({int(seuil_immunite_collective*100)}%)", horizontalalignment = 'center')
 
 #Trace les courbe
 plt.plot(liste_dates_reduite, ecartDate(reduction(projectionObjectif(proportion_primo_vaccines))), "red", label = "Français primo-vaccinés")
