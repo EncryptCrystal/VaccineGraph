@@ -285,7 +285,7 @@ for i in range(len(liste_courbes)): plt.plot(liste_dates_reduite, ecartDate(redu
 if seuil_immunite_collective != 0: plt.axhline(y = 100 * seuil_immunite_collective, color = 'black', linestyle = '--')
 
 #Trace une ligne de pointillé horizontale indiquant le seuil d'immunité colllective
-plt.text(len(liste_dates_reduite)/2, 100 *seuil_immunite_collective - 2, f"Seuil d'immunité collective ({int(seuil_immunite_collective*100)}%)", horizontalalignment = 'center')
+plt.text(len(liste_dates_reduite)/2, 100 *seuil_immunite_collective - 4, f"Seuil d'immunité collective ({int(seuil_immunite_collective*100)}%)", horizontalalignment = 'center')
 
 #Trace une zone en gris clair délimitée par une ligne verticales en pointillé pour désigner les prédictions des courbes (si les données n'ont pas été raccourcis)
 if empecher_valeurs_previsionnelles == False:
