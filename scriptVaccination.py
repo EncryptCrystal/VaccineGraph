@@ -16,11 +16,31 @@ seuil_immunite_collective = 0.90                                                
 y_min = 0                                                                       #Définit le pourcentage minimum affiché
 y_max = 100                                                                     #Définit le pourcentage maximum affiché
 
-#Données sur la population (Insee, 2021) (https://www.insee.fr/fr/outil-interactif/5367857/details/20_DEM/21_POP/21C_Figure3#)
-pop_18_59_ans = 34840410                                                        #34 840 410 Français ont entre 18 et 59 ans
-pop_60_ans = 18090604                                                           #18 090 604 Français ont plus de 60 ans
+#Liste des courbes demandées, en format (age minimal, age maximal, nb de doses, couleur du tracé)
+liste_courbes = [   ( 0, 80, 1, "red"),
+                    ( 0, 80, 2, "brown"),
+                    (60, 80, 1, "cyan"),
+                    (60, 80, 2, "darkblue"),
+                    (18, 59, 1, "yellow"),
+                    (18, 59, 2, "orange"),
+                    (12, 17, 1, "lawngreen"),
+                    (12, 17, 2, "darkgreen")]
 
-
+#Données sur la population en format (age minimal conserné, population de la tranche d'âge) (Insee, 2021) (https://www.insee.fr/fr/outil-interactif/5367857/details/20_DEM/21_POP/21C_Figure3#)
+liste_donnees_population = [( 0, 3632671),
+                            ( 5, 4069407),
+                            (10, 1703491),
+                            (12, 5070658),
+                            (18, 5474811),
+                            (25, 3699017),
+                            (30, 8279647),
+                            (40, 8572773),
+                            (50, 8814162),
+                            (60, 4125693),
+                            (65, 3875034),
+                            (70, 3680309),
+                            (75, 2276900),
+                            (80, 4132668)]
 
 #Sert à limiter une liste à limite_nombre_jour de manière uniforme
 def reduction(liste):
@@ -47,7 +67,7 @@ def ecartDate(liste):
         if i % limite_ecart_jour == 0: new_liste.append(liste[i])
     return new_liste
 
-#Sert à espacer un nombre par milliers, millions...
+#Sert à séparer les nombres par milliers, millions...
 def formatNombre(nombre):
     nombre = str(nombre)
     j = 0
@@ -56,6 +76,15 @@ def formatNombre(nombre):
             nombre = nombre[:-i-j] + " " + nombre[-i-j:]
             j += 1
     return nombre
+
+#Tant que chacune des courbes n'atteint pas 100 ET que chacune comporte autant d'éléments que la liste des dates, continuer la boucle
+def analyseListeDonnees(liste_dates, liste_courbes):
+    liste_nb_element_courbe = []
+    for courbe in liste_courbes:
+        liste_nb_element_courbe.append(len(courbe))
+        if len(courbe) != len(liste_dates): return True
+    if max(liste_nb_element_courbe) != len(liste_courbes[numero_passage_courbe]): return True
+    return False
 
 #Début du script
 fichier = open(nom_fichier,"r")                                                 #Ouvre le fichier
@@ -75,8 +104,8 @@ for ligne in lignes:
     del lst[2]                                                                  #Suppression des injections complètes quotidiennes
     lst[2] = int(lst[2])                                                        #Conversion du cumul des primo-injections en nombre entier
     lst[3] = int(lst[3])                                                        #Conversion du cumul des injections complètes en nombre entier
-    lst[4] = float(lst[4])                                                      #Conversion du taux de primo-vaccinés en nombre entier
-    lst[5] = float(lst[5])                                                      #Conversion du taux de vaccinés en nombre entier
+    del lst[4]                                                                  #Suppression du taux de primo-vaccinés en nombre entier
+    del lst[4]                                                                  #Suppression du taux de vaccinés en nombre entier
     table.append(lst)
     if lst[1] == limite_date_debut: limite_date_debut_existe = True             #Limiter le nombre de dates si la limite existe dans le fichier
 fichier.close()                                                                 #Ferme le fichier
@@ -95,118 +124,166 @@ for i in range(len(table)):
 #Initialisation des variables des dates et des 7 autres courbes
 liste_dates = []                                                                #Stocke la liste des dates en abscisse
 
-proportion_primo_vaccines = []                                                  #Stocke la proportion de primo-vaccinés
-proportion_primo_injections_12_17_ans = []                                      #Stocke la liste de la proportion de primo-vaccinés des 12-17 ans
-proportion_primo_injections_18_59_ans = []                                      #Stocke la liste de la proportion de primo-vaccinés des 18-59 ans
-proportion_primo_injections_60_ans = []                                         #Stocke la liste de la proportion de primo-vaccinés des +60 ans
-
-proportion_vaccines = []                                                        #Stocke la proportion de complètement vaccinés
-proportion_injections_completes_12_17_ans = []                                  #Stocke la liste de la proportion de vaccinés des 12-17 ans
-proportion_injections_completes_18_59_ans = []                                  #Stocke la liste de la proportion de vaccinés des 18-59 ans
-proportion_injections_completes_60_ans = []                                     #Stocke la liste de la proportion de vaccinés des +60 ans
-
-#Variables de transition entre les différentes classes d'âges
-cumul_proportion_primo_injections_18_59_ans = 0
-cumul_proportion_injections_completes_18_59_ans = 0
-cumul_proportion_primo_injections_60_ans = 0
-cumul_proportion_injections_completes_60_ans = 0
+liste_donnees = []
+for i in range(28): liste_donnees.append([])
 
 #Répartit les données dans les différentes listes
 for donnees in table:
-    #Afin de faciliter la compréhension du code, les 6 colonnes sont assignés à des variables
+    #Afin de faciliter la compréhension du code, les 4 colonnes sont assignés à des variables
     age = donnees[0]
     date = donnees[1]
     primo_injections = donnees[2]
     injections_completes = donnees[3]
-    taux_primo_vaccines = donnees[4]
-    taux_vaccines = donnees[5]
 
     #Dans le cas où la ligne concerne les injections tout âge confondu...
     if age == 0:
         liste_dates.append(date)
-        proportion_primo_vaccines.append(taux_primo_vaccines)
-        proportion_vaccines.append(taux_vaccines)
     
-    #Dans le cas où la ligne concerne les injections de personnes entre 12 et 17 ans...
+    #Dans le cas où la ligne concerne les injections de personnes entre 0 et 4 ans...
+    elif age == 4:
+        liste_donnees[0].append(primo_injections)
+        liste_donnees[1].append(injections_completes)
+
+    elif age == 9:
+        liste_donnees[2].append(primo_injections)
+        liste_donnees[3].append(injections_completes)
+    
+    elif age == 11:
+        liste_donnees[4].append(primo_injections)
+        liste_donnees[5].append(injections_completes)
+
     elif age == 17:
-        proportion_primo_injections_12_17_ans.append(taux_primo_vaccines)
-        proportion_injections_completes_12_17_ans.append(taux_vaccines)
-
-    #Dans le cas où la ligne concerne les injections de personnes entre 18 et 59 ans...
-    elif 18 <= age <= 59:
-        cumul_proportion_primo_injections_18_59_ans += primo_injections
-        cumul_proportion_injections_completes_18_59_ans += injections_completes
-
-        if age == 59:
-            proportion_primo_injections_18_59_ans.append(100*cumul_proportion_primo_injections_18_59_ans/pop_18_59_ans)
-            proportion_injections_completes_18_59_ans.append(100*cumul_proportion_injections_completes_18_59_ans/pop_18_59_ans)
-            cumul_proportion_primo_injections_18_59_ans = 0
-            cumul_proportion_injections_completes_18_59_ans = 0
-
-    #Dans le cas où la ligne concerne les injections de personnes 60 ans ou plus...
-    elif 60 <= age:
-        cumul_proportion_primo_injections_60_ans += primo_injections
-        cumul_proportion_injections_completes_60_ans += injections_completes
+        liste_donnees[6].append(primo_injections)
+        liste_donnees[7].append(injections_completes)
     
-        if age == 80:
-            proportion_primo_injections_60_ans.append(100*cumul_proportion_primo_injections_60_ans/pop_60_ans)
-            proportion_injections_completes_60_ans.append(100*cumul_proportion_injections_completes_60_ans/pop_60_ans)
-            cumul_proportion_primo_injections_60_ans = 0
-            cumul_proportion_injections_completes_60_ans = 0
+    elif age == 24:
+        liste_donnees[8].append(primo_injections)
+        liste_donnees[9].append(injections_completes)
+    
+    elif age == 29:
+        liste_donnees[10].append(primo_injections)
+        liste_donnees[11].append(injections_completes)    
+    
+    elif age == 39:
+        liste_donnees[12].append(primo_injections)
+        liste_donnees[13].append(injections_completes)
+    
+    elif age == 49:
+        liste_donnees[14].append(primo_injections)
+        liste_donnees[15].append(injections_completes)
+    
+    elif age == 59:
+        liste_donnees[16].append(primo_injections)
+        liste_donnees[17].append(injections_completes)
+    
+    elif age == 64:
+        liste_donnees[18].append(primo_injections)
+        liste_donnees[19].append(injections_completes)
+
+    elif age == 69:
+        liste_donnees[20].append(primo_injections)
+        liste_donnees[21].append(injections_completes)
+    
+    elif age == 74:
+        liste_donnees[22].append(primo_injections)
+        liste_donnees[23].append(injections_completes)
+    
+    elif age == 79:
+        liste_donnees[24].append(primo_injections)
+        liste_donnees[25].append(injections_completes)
+    
+    else:
+        liste_donnees[26].append(primo_injections)
+        liste_donnees[27].append(injections_completes)
+
 
 position_date_limite = len(liste_dates)-1                                       #Sauvegarde de la position du dernier jour dont on a les données
-
-#Tant que la proportion de vaccinés n'est pas de 100%, étendre le graphique
-coeff = (proportion_vaccines[-1]-proportion_vaccines[-1-nb_jour_prediction])/nb_jour_prediction
-i = 0
-limite_atteinte = False
-#Si il n'y a pas de date limite de fin, alors créer des dates jusqu'à ce que les 100% de vaccinés soient atteints et/ou dépassés ET que la limite d'écart entre les dates soit respecté
-#Sinon, alors créer des dates jusqu'à ce que la date limite soit atteinte et/ou dépassée ET que la limite d'écart entre les dates soit respecté
-while (limite_date_fin == 0 and (i <= (100-proportion_vaccines[-1]) /coeff or ( len(liste_dates)-1) % limite_ecart_jour != 0) ) or (limite_atteinte == False and (len(liste_dates)-1)%limite_ecart_jour != 0):
-    date = date[0:8] + str(int(date[8:])+1)
-    if len(date[8:]) == 1: date = date[0:8] + "0" + date[-1] 
-    if date[5:7] == "01" and date[8:10] == "32": date = date[0:5] + "02-01"
-    elif date[5:7] == "02" and date[8:10] == "29" and int(date[0:4])%4 != 0: date = date[0:5] + "03-01"
-    elif date[5:7] == "02" and date[8:10] == "30" and int(date[0:4])%4 == 0: date = date[0:5] + "03-01"
-    elif date[5:7] == "03" and date[8:10] == "32": date = date[0:5] + "04-01"
-    elif date[5:7] == "04" and date[8:10] == "31": date = date[0:5] + "05-01"
-    elif date[5:7] == "05" and date[8:10] == "32": date = date[0:5] + "06-01"
-    elif date[5:7] == "06" and date[8:10] == "31": date = date[0:5] + "07-01"
-    elif date[5:7] == "07" and date[8:10] == "32": date = date[0:5] + "08-01"
-    elif date[5:7] == "08" and date[8:10] == "32": date = date[0:5] + "09-01"
-    elif date[5:7] == "09" and date[8:10] == "31": date = date[0:5] + "10-01"
-    elif date[5:7] == "10" and date[8:10] == "32": date = date[0:5] + "11-01"
-    elif date[5:7] == "11" and date[8:10] == "31": date = date[0:5] + "12-01"
-    elif date[5:7] == "12" and date[8:10] == "32": date = str(int(date[0:4])+1) + "-01-01"
-    i += 1
-    liste_dates.append(date)
-    if date == limite_date_fin: limite_atteinte = True
-
-#Passe le format de toutes les dates : AAAA-MM-JJ -> JJ/MM
-for i in range(len(liste_dates)): liste_dates[i] = liste_dates[i][8:11]+"/"+liste_dates[i][5:7]
-
-liste_dates_reduite = ecartDate(reduction(liste_dates))                         #Réduit la liste de dates tout en conservant l'original
 
 
 #Début de la contruction du graphique
 plt.figure(figsize = (16, 5))                                                   #Définit une dimension en 16/5
 plt.tick_params(axis = 'x', rotation = 80)                                      #Tourne les dates à 80° afin qu'elles restent visibles
 
-#Trace une ligne de pointillé verticale au niveau des 100%
-plt.axhline(y = 100 * seuil_immunite_collective, color = 'black', linestyle = '--')
+
+#Trace les courbes
+liste_titre = []
+liste_couleur = []
+
+for courbe in liste_courbes:                                                    #On prend une à une les courbes demandées
+    courbe_finale = [0]*len(liste_donnees[0])                                   #Contient le nombre final d'injection pour la tranche d'âge demandée
+    population_totale = 0
+    liste_age = []                                                              #Contient les différentes tranches d'âge utilisées
+    for position_age in range(len(liste_donnees_population)):                   #On balaye la liste de données de population pour savoir si l'âge correspond à la demande, et si c'est le cas :
+        if courbe[0] <= liste_donnees_population[position_age][0] < courbe[1] or liste_donnees_population[position_age][0] == 80 == courbe[1]:
+            population_totale += liste_donnees_population[position_age][1]      #Ajouter la population sélectionnée au total de population consernée
+            liste_age.append(liste_donnees_population[position_age][0])         #Ajouter à la liste des âges utilisées l'âge minimum utilisé
+            for i in range(len(liste_donnees[0])):                              #Additionner les injections à la courbe totale, en prenant en compte la distanction primo-injection/injecction finale
+                courbe_finale[i] += liste_donnees[position_age*2+courbe[2]-1][i]
+    
+    #Les données passent du nombre d'injection au pourcentage de population
+    for i in range(len(courbe_finale)): courbe_finale[i] = 100*courbe_finale[i]/population_totale
+
+    #Si l'âge maximal n'est pas 18 ans, recherchez quelle est la classe d'âge supérieure, et y retirer 1
+    if liste_age[-1] != 80:
+        for i in range(len(liste_donnees_population)):
+            if liste_donnees_population[i][0] == liste_age[-1]:
+                liste_age.append(liste_donnees_population[i+1][0]-1)
+    
+    if liste_age[0] == 0 and liste_age[-1] == 80: titre = "Français"            #Si la part d'âge demandée couvre l'ensemble des Français, alors mettre "Français" dans le titre
+    elif liste_age[-1] == 80: titre = f"+{liste_age[0]} ans"                    #Sinon, si la tranche d'âge demandée va jusqu'à l'âge maximal, mettre "+[âge minimal]" dans le titre
+    else: titre = f"{liste_age[0]}-{liste_age[-1]} ans"                         #Sinon, mettre "[âge minimal]-[âge maximal]" dans le titre
+    
+    if courbe[2] == 1: titre += " primo-vaccinés"
+    else: titre += " vaccinés"
+    
+    liste_titre.append(titre)
+    liste_couleur.append(courbe[3])
+    liste_courbes[liste_courbes.index(courbe)] = courbe_finale
+
+
+liste_coeff = []
+numero_passage_courbe = 0
+
+#Ajout des différents coeffs dans la liste adéquate
+for i in range(len(liste_courbes)): liste_coeff.append((liste_courbes[i][-1]-liste_courbes[i][-1-nb_jour_prediction])/nb_jour_prediction)
+
+#Tant que la proportion de vaccinés n'est pas de 100%, étendre le graphique
+#Si il n'y a pas de date limite de fin, alors créer des dates jusqu'à ce que les 100% de vaccinés soient atteints et/ou dépassés ET que la limite d'écart entre les dates soit respecté
+#Sinon, alors créer des dates jusqu'à ce que la date limite soit atteinte et/ou dépassée ET que la limite d'écart entre les dates soit respecté
+while analyseListeDonnees(liste_dates, liste_courbes) or ((limite_date_fin == 0 and (liste_courbes[numero_passage_courbe][-1] < 100 or ( len(liste_courbes[numero_passage_courbe])-1) % limite_ecart_jour != 0) )   or   (limite_date_fin != 0 and (limite_date_fin not in liste_dates or len(liste_dates) != len(liste_courbes[numero_passage_courbe]) or (len(liste_courbes[numero_passage_courbe])-1)%limite_ecart_jour != 0))):
+    liste_courbes[numero_passage_courbe].append(liste_courbes[numero_passage_courbe][-1]+liste_coeff[numero_passage_courbe])
+    if len(liste_courbes[numero_passage_courbe]) > len(liste_dates):
+            date = date[0:8] + str(int(date[8:])+1)
+            if len(date[8:]) == 1: date = date[0:8] + "0" + date[-1] 
+            if date[5:7] == "01" and date[8:10] == "32": date = date[0:5] + "02-01"
+            elif date[5:7] == "02" and date[8:10] == "29" and int(date[0:4])%4 != 0: date = date[0:5] + "03-01"
+            elif date[5:7] == "02" and date[8:10] == "30" and int(date[0:4])%4 == 0: date = date[0:5] + "03-01"
+            elif date[5:7] == "03" and date[8:10] == "32": date = date[0:5] + "04-01"
+            elif date[5:7] == "04" and date[8:10] == "31": date = date[0:5] + "05-01"
+            elif date[5:7] == "05" and date[8:10] == "32": date = date[0:5] + "06-01"
+            elif date[5:7] == "06" and date[8:10] == "31": date = date[0:5] + "07-01"
+            elif date[5:7] == "07" and date[8:10] == "32": date = date[0:5] + "08-01"
+            elif date[5:7] == "08" and date[8:10] == "32": date = date[0:5] + "09-01"
+            elif date[5:7] == "09" and date[8:10] == "31": date = date[0:5] + "10-01"
+            elif date[5:7] == "10" and date[8:10] == "32": date = date[0:5] + "11-01"
+            elif date[5:7] == "11" and date[8:10] == "31": date = date[0:5] + "12-01"
+            elif date[5:7] == "12" and date[8:10] == "32": date = str(int(date[0:4])+1) + "-01-01"
+            liste_dates.append(date)
+    numero_passage_courbe = (numero_passage_courbe + 1)%len(liste_courbes)
+
+#Passe le format de toutes les dates : AAAA-MM-JJ -> JJ/MM
+for i in range(len(liste_dates)): liste_dates[i] = liste_dates[i][8:11]+"/"+liste_dates[i][5:7]
+
+liste_dates_reduite = ecartDate(reduction(liste_dates))                         #Réduit la liste de dates tout en conservant l'original
+    
+for i in range(len(liste_courbes)): plt.plot(liste_dates_reduite, ecartDate(reduction(projectionObjectif(liste_courbes[i]))), liste_couleur[i], label = liste_titre[i])
+
+
+#Trace une ligne de pointillé verticale au niveau des 100% si le seuil d'immunité collective n'est pas égal à 0
+if seuil_immunite_collective != 0: plt.axhline(y = 100 * seuil_immunite_collective, color = 'black', linestyle = '--')
 
 #Trace une ligne de pointillé horizontale indiquant le seuil d'immunité colllective
 plt.text(len(liste_dates_reduite)/2, 100 *seuil_immunite_collective + 1.2, f"Seuil d'immunité collective ({int(seuil_immunite_collective*100)}%)", horizontalalignment = 'center')
-
-#Trace les courbe
-plt.plot(liste_dates_reduite, ecartDate(reduction(projectionObjectif(proportion_primo_vaccines))), "red", label = "Français primo-vaccinés")
-plt.plot(liste_dates_reduite, ecartDate(reduction(projectionObjectif(proportion_vaccines))), "brown", label = "Français vaccinés")
-plt.plot(liste_dates_reduite, ecartDate(reduction(projectionObjectif(proportion_primo_injections_60_ans))), "cyan", label = "+60 ans primo-vaccinés")
-plt.plot(liste_dates_reduite, ecartDate(reduction(projectionObjectif(proportion_injections_completes_60_ans))), "darkblue", label = "+60 ans vaccinés")
-plt.plot(liste_dates_reduite, ecartDate(reduction(projectionObjectif(proportion_primo_injections_18_59_ans))), "yellow", label = "18-59 ans primo-vaccinés")
-plt.plot(liste_dates_reduite, ecartDate(reduction(projectionObjectif(proportion_injections_completes_18_59_ans))), "orange", label = "18-59 ans vaccinés")
-plt.plot(liste_dates_reduite, ecartDate(reduction(projectionObjectif(proportion_primo_injections_12_17_ans))), "lawngreen", label = "12-17 ans primo-vaccinés")
-plt.plot(liste_dates_reduite, ecartDate(reduction(projectionObjectif(proportion_injections_completes_12_17_ans))), "darkgreen", label = "12-17 ans vaccinés")
 
 #Trace une zone en gris clair délimitée par une ligne verticales en pointillé pour désigner les prédictions des courbes (si les données n'ont pas été raccourcis)
 if empecher_valeurs_previsionnelles == False:
@@ -222,8 +299,7 @@ plt.margins(0, 0)                                                               
 
 #Défini les titres du graphe et des axes x et y, et ajoute des notes en bas du graphe
 plt.title(f"Avancement de la vaccination (données du {nom_fichier[20:22]}/{nom_fichier[17:19]}/{nom_fichier[12:16]})")
-plt.xlabel(f"""Dates\n\nLes prévisions sont faites à partir des {formatNombre(nb_jour_prediction)} jours précédents. En considérant une population de 18-59 ans de {formatNombre(pop_18_59_ans)} habitants et de +60 ans de {formatNombre(pop_60_ans)} habitants (Insee, 2021).
-La proportion de 12-17 ans est fournie par le même fichier actuellement utilisé pour connaître l'état de la vaccination par tranche d'âge en France.
+plt.xlabel(f"""Dates\n\nLes prévisions sont faites à partir des {formatNombre(nb_jour_prediction)} jours précédents. En considérant une population égale à celle indiquée par l'Insee en 2021.
 Source des données sur Data.gouv et code du graphique disponible sur https://github.com/A2drien/VaccineGraph.""")
 plt.ylabel("Pourcentage de vaccinés (%)")
 
