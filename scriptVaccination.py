@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-nom_fichier = "vacsi-a-fra-2021-08-30-19h05.csv"                                #Nom du fichier de données à traiter
+nom_fichier = "vacsi-a-fra-2021-08-31-19h05.csv"                                #Nom du fichier de données à traiter
 
 #Paramètres du graphique
 limite_date_debut = "2021-01-01"                                                #Indique la première date des données (0 pour conserver la liste)
@@ -276,16 +276,18 @@ for i in range(len(liste_dates)): liste_dates[i] = liste_dates[i][8:11]+"/"+list
 
 liste_dates_reduite = ecartDate(reduction(liste_dates))                         #Réduit la liste de dates tout en conservant l'original
     
-for i in range(len(liste_courbes)): plt.plot(liste_dates_reduite, ecartDate(reduction(projectionObjectif(liste_courbes[i]))), liste_couleur[i], label = liste_titre[i])
+for i in range(len(liste_courbes)):
+    plt.plot(liste_dates_reduite[:position_date_limite//limite_ecart_jour+1], ecartDate(reduction(projectionObjectif(liste_courbes[i])))[:position_date_limite//limite_ecart_jour+1], liste_couleur[i], label = liste_titre[i])
+    plt.plot(liste_dates_reduite[position_date_limite//limite_ecart_jour:], ecartDate(reduction(projectionObjectif(liste_courbes[i])))[position_date_limite//limite_ecart_jour:], liste_couleur[i], linestyle = '--')
 
 
-#Trace une ligne de pointillé verticale au niveau des 100% si le seuil d'immunité collective n'est pas égal à 0
+#Trace une ligne de pointillé horizontale au niveau des 100% si le seuil d'immunité collective n'est pas égal à 0
 if seuil_immunite_collective != 0: plt.axhline(y = 100 * seuil_immunite_collective, color = 'black', linestyle = '--')
 
 #Trace une ligne de pointillé horizontale indiquant le seuil d'immunité colllective
 plt.text(len(liste_dates_reduite)/2, 100 *seuil_immunite_collective + 1.2, f"Seuil d'immunité collective ({int(seuil_immunite_collective*100)}%)", horizontalalignment = 'center')
 
-#Trace une zone en gris clair délimitée par une ligne verticales en pointillé pour désigner les prédictions des courbes (si les données n'ont pas été raccourcis)
+#Trace une zone en gris clair délimitée par une ligne verticale en pointillé pour désigner les prédictions des courbes (si les données n'ont pas été raccourcies)
 if empecher_valeurs_previsionnelles == False:
     plt.axvline(x = liste_dates_reduite[position_date_limite//limite_ecart_jour], color = 'gray', linestyle = '--')
     plt.axvspan(liste_dates_reduite[position_date_limite//limite_ecart_jour], liste_dates_reduite[-1], alpha = 0.5, color = 'lightgray')
