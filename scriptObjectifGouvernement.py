@@ -188,14 +188,24 @@ liste_dates_reduite = ecartDate(reduction(liste_dates))                         
 plt.figure(figsize = (16, 5))                                                   #Définit une dimension en 16/5
 plt.tick_params(axis = 'x', rotation = 80)                                      #Tourne les dates à 80° afin qu'elles restent visibles
 
-#Trace les courbes
-plt.plot(liste_dates_reduite, ecartDate(reduction(projectionObjectif(primo_injections_totales))), "red", label = f"Objectif de primo-vaccinés ({int(obj_1_dose/1000000)} M)")
-plt.plot(liste_dates_reduite, ecartDate(reduction(projectionObjectif(injections_completes_totales))), "firebrick", label = f"Objectif de vaccinés ({int(obj_tot_dose/1000000)} M)")
-plt.plot(liste_dates_reduite, ecartDate(reduction(projectionObjectif(primo_injections_50_ans))), "orange", label = f"Objectif des +50 ans primo-vaccinés ({int(obj_50_ans_1_dose*100)}%)")
-plt.plot(liste_dates_reduite, ecartDate(reduction(projectionObjectif(primo_injections_18_ans))), "lawngreen", label = f"Objectif des +18 ans primo-vaccinés ({int(obj_18_ans_1_dose*100)}%)")
-plt.plot(liste_dates_reduite, ecartDate(reduction(projectionObjectif(injections_completes_18_ans))), "darkgreen", label = f"Objectif des +18 ans vaccinés ({int(obj_18_ans_tot_dose*100)}%)")
-plt.plot(liste_dates_reduite, ecartDate(reduction(projectionObjectif(proportion_primo_vaccines))), "cyan", label = "Référence : Français 100% primo-vaccinés")
-plt.plot(liste_dates_reduite, ecartDate(reduction(projectionObjectif(proportion_vaccines))), "darkblue", label = "Référence : Français 100% vaccinés")
+#Trace les courbes continues (non prévisionelles, factuelles)
+plt.plot(liste_dates_reduite[:position_date_limite//limite_ecart_jour+1], ecartDate(reduction(projectionObjectif(primo_injections_totales)))[:position_date_limite//limite_ecart_jour+1], "red", label = f"Objectif de primo-vaccinés ({int(obj_1_dose/1000000)} M)")
+plt.plot(liste_dates_reduite[:position_date_limite//limite_ecart_jour+1], ecartDate(reduction(projectionObjectif(injections_completes_totales)))[:position_date_limite//limite_ecart_jour+1], "firebrick", label = f"Objectif de vaccinés ({int(obj_tot_dose/1000000)} M)")
+plt.plot(liste_dates_reduite[:position_date_limite//limite_ecart_jour+1], ecartDate(reduction(projectionObjectif(primo_injections_50_ans)))[:position_date_limite//limite_ecart_jour+1], "orange", label = f"Objectif des +50 ans primo-vaccinés ({int(obj_50_ans_1_dose*100)}%)")
+plt.plot(liste_dates_reduite[:position_date_limite//limite_ecart_jour+1], ecartDate(reduction(projectionObjectif(primo_injections_18_ans)))[:position_date_limite//limite_ecart_jour+1], "lawngreen", label = f"Objectif des +18 ans primo-vaccinés ({int(obj_18_ans_1_dose*100)}%)")
+plt.plot(liste_dates_reduite[:position_date_limite//limite_ecart_jour+1], ecartDate(reduction(projectionObjectif(injections_completes_18_ans)))[:position_date_limite//limite_ecart_jour+1], "darkgreen", label = f"Objectif des +18 ans vaccinés ({int(obj_18_ans_tot_dose*100)}%)")
+plt.plot(liste_dates_reduite[:position_date_limite//limite_ecart_jour+1], ecartDate(reduction(projectionObjectif(proportion_primo_vaccines)))[:position_date_limite//limite_ecart_jour+1], "cyan", label = "Référence : Français 100% primo-vaccinés")
+plt.plot(liste_dates_reduite[:position_date_limite//limite_ecart_jour+1], ecartDate(reduction(projectionObjectif(proportion_vaccines)))[:position_date_limite//limite_ecart_jour+1], "darkblue", label = "Référence : Français 100% vaccinés")
+
+#Trace les courbes discontinues, prévisionnnelles
+plt.plot(liste_dates_reduite[position_date_limite//limite_ecart_jour:], ecartDate(reduction(projectionObjectif(primo_injections_totales)))[position_date_limite//limite_ecart_jour:], "red", linestyle = '--')
+plt.plot(liste_dates_reduite[position_date_limite//limite_ecart_jour:], ecartDate(reduction(projectionObjectif(injections_completes_totales)))[position_date_limite//limite_ecart_jour:], "firebrick", linestyle = '--')
+plt.plot(liste_dates_reduite[position_date_limite//limite_ecart_jour:], ecartDate(reduction(projectionObjectif(primo_injections_50_ans)))[position_date_limite//limite_ecart_jour:], "orange", linestyle = '--')
+plt.plot(liste_dates_reduite[position_date_limite//limite_ecart_jour:], ecartDate(reduction(projectionObjectif(primo_injections_18_ans)))[position_date_limite//limite_ecart_jour:], "lawngreen", linestyle = '--')
+plt.plot(liste_dates_reduite[position_date_limite//limite_ecart_jour:], ecartDate(reduction(projectionObjectif(injections_completes_18_ans)))[position_date_limite//limite_ecart_jour:], "darkgreen", linestyle = '--')
+plt.plot(liste_dates_reduite[position_date_limite//limite_ecart_jour:], ecartDate(reduction(projectionObjectif(proportion_primo_vaccines)))[position_date_limite//limite_ecart_jour:], "cyan", linestyle = '--')
+plt.plot(liste_dates_reduite[position_date_limite//limite_ecart_jour:], ecartDate(reduction(projectionObjectif(proportion_vaccines)))[position_date_limite//limite_ecart_jour:], "darkblue", linestyle = '--')
+
 
 #Trace une zone en gris clair délimitée par une ligne verticales en pointillé pour désigner les prédictions des courbes (si les données n'ont pas été raccourcis)
 if empecher_valeurs_previsionnelles == False:
