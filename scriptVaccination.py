@@ -1,10 +1,10 @@
 #Imporations de divers modules
 from operator import itemgetter
-
 import matplotlib.pyplot as plt
 import numpy as np
 
-nom_fichier = "vacsi-a-fra-2021-08-26-19h10.csv"                                #Nom du fichier de données à traiter
+
+nom_fichier = "vacsi-a-fra-2021-08-30-19h05.csv"                                #Nom du fichier de données à traiter
 
 #Paramètres du graphique
 limite_date_debut = "2021-01-01"                                                #Indique la première date des données (0 pour conserver la liste)
@@ -274,7 +274,7 @@ while analyseListeDonnees(liste_dates, liste_courbes) or ((limite_date_fin == 0 
 #Passe le format de toutes les dates : AAAA-MM-JJ -> JJ/MM
 for i in range(len(liste_dates)): liste_dates[i] = liste_dates[i][8:11]+"/"+liste_dates[i][5:7]
 
-liste_dates_reduite = ecartDate(reduction(liste_dates))                         #éeduit la liste de dates tout en conservant l'original
+liste_dates_reduite = ecartDate(reduction(liste_dates))                         #Réduit la liste de dates tout en conservant l'original
     
 for i in range(len(liste_courbes)): plt.plot(liste_dates_reduite, ecartDate(reduction(projectionObjectif(liste_courbes[i]))), liste_couleur[i], label = liste_titre[i])
 

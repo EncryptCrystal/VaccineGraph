@@ -1,12 +1,19 @@
-# VaccineGraph
-Je crée un graphique essayant de prédire la vaccination en France dans les semaines à venir.
+<p align="center">Graphique prédisant la vaccination en France dans les semaines à venir.
+<br>
+<br>
+<a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/Licence-MIT-blue.svg"></a>
+</p>
 
-Ici, les objectifs du gouvernement :
-<img src="Objectifs Gouvernement 2021-08-26.png" width="1000">
+<p align="center">
+Objectifs du gouvernement :
+<img src="Objectifs Gouvernement 2021-08-27.png" width="1000">
+</p>
 
-Et ici, la prédiction de la vaccination complète pour 100% des Français :
-<img src="Objectifs Vaccination 2021-08-26.png" width="1000">
+<p align="center">
+Prédiction de la vaccination complète pour 100% des Français :
+<img src="Objectifs Vaccination 2021-08-27.png" width="1000">
+</p>
 
-Vous pouvez télécharger ici les données de vaccination par âge et par jour : https://www.data.gouv.fr/fr/datasets/r/54dd5f8d-1e2e-4ccb-8fb8-eac68245befd
-
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+<p align="center">
+Vous pouvez télécharger <a href="https://www.data.gouv.fr/fr/datasets/r/54dd5f8d-1e2e-4ccb-8fb8-eac68245befd">ici</a> les données de vaccination par âge et par jour.
+</p>
