@@ -1,5 +1,6 @@
 #Imporations de divers modules
 from urllib import request
+import urllib.request
 from operator import itemgetter
 import matplotlib.pyplot as plt
 import numpy as np
@@ -14,6 +15,9 @@ nb_jour_prediction = 7                                                          
 seuil_immunite_collective = 0.90                                                #Définit le seuil d'immunité collective (trace une ligne honrizontale à ce pourcentage)
 y_min = 0                                                                       #Définit le pourcentage minimum affiché
 y_max = 100                                                                     #Définit le pourcentage maximum affiché
+
+#Paramètres du fichier de données
+lieu_telechargement = "Archives Données/"
 
 #Liste des courbes demandées, en format (age minimal, age maximal, nb de doses, couleur du tracé)
 liste_courbes = [   ( 0, 80, 1, "red"),
@@ -87,13 +91,26 @@ def analyseListeDonnees(liste_dates, liste_courbes):
 
 
 #Sauvegarde temporairement le fichier de données
-lines = str(request.urlopen("https://www.data.gouv.fr/fr/datasets/r/54dd5f8d-1e2e-4ccb-8fb8-eac68245befd").read()).strip("b'").split("\\n")
-fichier = open("fichier_temporaire.csv", "w")
-for line in lines: fichier.write(line + "\n")
+lignes = str(urllib.request.urlopen("https://www.data.gouv.fr/fr/datasets/donnees-relatives-aux-personnes-vaccinees-contre-la-covid-19-1/").read()).strip("b'").split("\\n")
+fichier = open("fichier_temporaire.html", "w")
+
+for ligne in lignes:
+    if "vacsi-a-fra-" in ligne and "vacsi-a-fra-YYYY-MM-DD-HHhmm.csv" not in ligne:
+        for i in range(len(ligne)-32):
+            nom_fichier = ligne[i:i+12]
+            if nom_fichier == "vacsi-a-fra-":
+                nom_fichier = ligne[i:i+32]
+                break
 fichier.close()
 
+if os.path.exists(lieu_telechargement+nom_fichier) == False:
+    lignes = str(request.urlopen("https://www.data.gouv.fr/fr/datasets/r/54dd5f8d-1e2e-4ccb-8fb8-eac68245befd").read()).strip("b'").split("\\n")
+    fichier = open(lieu_telechargement+nom_fichier, "w")
+    for ligne in lignes: fichier.write(ligne + "\n")
+    fichier.close()
+
 #Début du script
-fichier = open("fichier_temporaire.csv", "r")                                   #Ouvre le fichier
+fichier = open(lieu_telechargement+nom_fichier, "r")                                   #Ouvre le fichier
 ligne_descripteurs = fichier.readline().rstrip().rsplit(";")                    #Sépare la première ligne (titres des colonnes) du reste des valeurs numériques
 lignes = fichier.readlines()                                                    #Le reste est entreposée dans "lignes"
 table = []
@@ -304,8 +321,6 @@ plt.grid()                                                                      
 plt.legend()                                                                    #Affiche les légendes associés à la courbe correspondante
 plt.margins(0, 0)                                                               #Force la disparition des marges intérieures
 
-print(dernier_jour[:4])
-
 #Défini les titres du graphe et des axes x et y, et ajoute des notes en bas du graphe
 plt.title(f"Avancement de la vaccination (dernières données datant du {dernier_jour[8:]}/{dernier_jour[5:7]}/{dernier_jour[:4]})")
 plt.xlabel(f"""Dates\n\nLes prévisions sont faites à partir des {formatNombre(nb_jour_prediction)} jours précédents. En considérant une population égale à celle indiquée par l'Insee en 2021.
@@ -315,4 +330,4 @@ plt.ylabel("Pourcentage de vaccinés (%)")
 #Sauvegarde l'image avec la date des données et supprime et les marges exterieures
 plt.savefig(f"Objectifs Vaccination {dernier_jour}.png", bbox_inches = 'tight')
 
-os.remove("fichier_temporaire.csv")
+os.remove("fichier_temporaire.html")
