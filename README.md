@@ -5,13 +5,15 @@
 </p>
 
 <p align="center">
-Objectifs du gouvernement :
-<img src="Objectifs Gouvernement.png" width="1000">
-</p>
-
-<p align="center">
 Prédiction de la vaccination complète pour 100% des Français :
 <img src="Objectifs Vaccination.png" width="1000">
+</p>
+
+
+
+<p align="center">
+[Archivé] Objectifs du gouvernement :
+<img src="Archives Objectifs Gouvernement\Objectifs Gouvernement.png" width="1000">
 </p>
 
 <p align="center">
