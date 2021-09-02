@@ -6,12 +6,12 @@
 
 <p align="center">
 Objectifs du gouvernement :
-<img src="Objectifs Gouvernement 2021-08-27.png" width="1000">
+<img src="Objectifs Gouvernement.png" width="1000">
 </p>
 
 <p align="center">
 Prédiction de la vaccination complète pour 100% des Français :
-<img src="Objectifs Vaccination 2021-08-27.png" width="1000">
+<img src="Objectifs Vaccination.png" width="1000">
 </p>
 
 <p align="center">
