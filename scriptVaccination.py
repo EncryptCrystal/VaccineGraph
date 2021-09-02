@@ -110,7 +110,7 @@ if os.path.exists(lieu_telechargement+nom_fichier) == False:
     fichier.close()
 
 #Début du script
-fichier = open(lieu_telechargement+nom_fichier, "r")                                   #Ouvre le fichier
+fichier = open(lieu_telechargement+nom_fichier, "r")                            #Ouvre le fichier
 ligne_descripteurs = fichier.readline().rstrip().rsplit(";")                    #Sépare la première ligne (titres des colonnes) du reste des valeurs numériques
 lignes = fichier.readlines()                                                    #Le reste est entreposée dans "lignes"
 table = []

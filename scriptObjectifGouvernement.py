@@ -1,10 +1,11 @@
 #Imporations de divers modules
+from urllib import request
+import urllib.request
 from operator import itemgetter
 import matplotlib.pyplot as plt
 import numpy as np
+import os
 
-
-nom_fichier = "vacsi-a-fra-2021-09-01-19h05.csv"                                #Nom du fichier de données à traiter
 
 #Paramètres du graphique
 limite_date_debut = "2020-12-29"                                                #Indique la première date des données (0 pour conserver la liste)
@@ -27,6 +28,8 @@ obj_18_ans_tot_dose = 0.66                                                      
 pop_50_ans = 27824662                                                           #27 824 662 Français ont plus de 50 ans
 pop_18_ans = 53761464                                                           #53 761 464 Français ont plus de 18 ans
 
+#Paramètres du fichier de données
+lieu_telechargement = "Archives Données/"
 
 
 #Sert à limiter une liste à limite_nombre_jour de manière uniforme
@@ -63,10 +66,28 @@ def formatNombre(nombre):
             j += 1
     return nombre
 
+#Sauvegarde temporairement le fichier de données
+lignes = str(urllib.request.urlopen("https://www.data.gouv.fr/fr/datasets/donnees-relatives-aux-personnes-vaccinees-contre-la-covid-19-1/").read()).strip("b'").split("\\n")
+fichier = open("fichier_temporaire.html", "w")
+
+for ligne in lignes:
+    if "vacsi-a-fra-" in ligne and "vacsi-a-fra-YYYY-MM-DD-HHhmm.csv" not in ligne:
+        for i in range(len(ligne)-32):
+            nom_fichier = ligne[i:i+12]
+            if nom_fichier == "vacsi-a-fra-":
+                nom_fichier = ligne[i:i+32]
+                break
+fichier.close()
+
+if os.path.exists(lieu_telechargement+nom_fichier) == False:
+    lignes = str(request.urlopen("https://www.data.gouv.fr/fr/datasets/r/54dd5f8d-1e2e-4ccb-8fb8-eac68245befd").read()).strip("b'").split("\\n")
+    fichier = open(lieu_telechargement+nom_fichier, "w")
+    for ligne in lignes: fichier.write(ligne + "\n")
+    fichier.close()
+
 #Début du script
-fichier = open(nom_fichier,"r")                                                 #Ouvre le fichier
-ligne_descripteurs = fichier.readline()
-lst_descripteurs = ligne_descripteurs.rstrip().rsplit(";")                      #Sépare la première ligne (titres des colonnes) du reste des valeurs numériques
+fichier = open(lieu_telechargement+nom_fichier, "r")                            #Ouvre le fichier
+ligne_descripteurs = fichier.readline().rstrip().rsplit(";")                    #Sépare la première ligne (titres des colonnes) du reste des valeurs numériques
 lignes = fichier.readlines()                                                    #Le reste est entreposée dans "lignes"
 table = []
 
@@ -74,17 +95,18 @@ empecher_valeurs_previsionnelles = False                                        
 limite_date_debut_existe = False                                                #Par défaut, ne pas supprimer des dates sans vérifier que la limite de début existe
 
 for ligne in lignes:
-    lst = ligne.rstrip().split(";")
-    del lst[0]                                                                  #Supression des valeurs du pays de l'injection (toutes dans le fichier sont en France)
-    lst[0] = int(lst[0])                                                        #Conversion de l'âge des vaccinés en nombre entier (de base une chaine de caractères)
-    del lst[2]                                                                  #Suppression des primo-injections quotidiennes
-    del lst[2]                                                                  #Suppression des injections complètes quotidiennes
-    lst[2] = int(lst[2])                                                        #Conversion du cumul des primo-injections en nombre entier
-    lst[3] = int(lst[3])                                                        #Conversion du cumul des injections complètes en nombre entier
-    lst[4] = float(lst[4])                                                      #Conversion du taux de primo-vaccinés en nombre décimal
-    lst[5] = float(lst[5])                                                      #Conversion du taux de vaccinés en nombre décimal
-    table.append(lst)
-    if lst[1] == limite_date_debut: limite_date_debut_existe = True             #Limiter le nombre de dates si la limite existe dans le fichier
+    ligne = ligne.rstrip().split(";")
+    if ligne[0] == "": break
+    del ligne[0]                                                                #Supression des valeurs du pays de l'injection (toutes dans le fichier sont en France)
+    ligne[0] = int(ligne[0])                                                    #Conversion de l'âge des vaccinés en nombre entier (de base une chaine de caractères)
+    del ligne[2]                                                                #Suppression des primo-injections quotidiennes
+    del ligne[2]                                                                #Suppression des injections complètes quotidiennes
+    ligne[2] = int(ligne[2])                                                    #Conversion du cumul des primo-injections en nombre entier
+    ligne[3] = int(ligne[3])                                                    #Conversion du cumul des injections complètes en nombre entier
+    ligne[4] = float(ligne[4])                                                  #Conversion du taux de primo-vaccinés en nombre décimal
+    ligne[5] = float(ligne[5])                                                  #Conversion du taux de vaccinés en nombre décimal
+    table.append(ligne)
+    if ligne[1] == limite_date_debut: limite_date_debut_existe = True           #Limiter le nombre de dates si la limite existe dans le fichier
 fichier.close()                                                                 #Ferme le fichier
 table = sorted(table, key=itemgetter(1, 0))                                     #Tri les données par date, puis par âge
 
@@ -157,6 +179,7 @@ for donnees in table:
         cumul_injections_completes_18_ans = 0
 
 position_date_limite = len(liste_dates)-1                                       #Sauvegarde de la position du dernier jour dont on a les données
+dernier_jour = liste_dates[-1]                                                  #Sauvegarde le dernier jour existant dans les données
 
 #Sert à créer une liste de dates jusqu'à une date limite de fin (s'il y en a une)
 while liste_dates[-1] != limite_date_fin and limite_date_fin != 0:
@@ -222,9 +245,11 @@ plt.margins(0, 0)                                                               
 #Défini les titres du graphe et des axes x et y
 plt.title(f"État des objectifs gouvernementaux pour la fin août (données du {nom_fichier[20:22]}/{nom_fichier[17:19]}/{nom_fichier[12:16]})")
 plt.xlabel(f"""Dates\n\nLes prévisions sont faites à partir des {formatNombre(nb_jour_prediction)} jours précédents. En considérant une population de +18 ans de {formatNombre(pop_18_ans)} habitants et de +50 ans de {formatNombre(pop_50_ans)} habitants (Insee, 2021).
-Source des données sur Data.gouv et code du graphique disponible sur https://github.com/A2drien/VaccineGraph.""")
+Dernier jour de remontée des données : {dernier_jour[8:]}/{dernier_jour[5:7]}/{dernier_jour[:4]}. Source des données sur Data.gouv et code du graphique disponible sur https://github.com/A2drien/VaccineGraph.""")
 plt.ylabel("Pourcentage atteint des objectifs (%)")
 
 #Sauvegarde l'image avec la date des données et supprime et les marges exterieures
 plt.savefig(f"Objectifs Gouvernement.png", bbox_inches = 'tight')
 plt.savefig(f"Archives Objectifs Gouvernement\Objectifs Gouvernement {nom_fichier[12:22]}.png", bbox_inches = 'tight')
+
+os.remove("fichier_temporaire.html")
