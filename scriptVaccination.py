@@ -1,10 +1,9 @@
 #Imporations de divers modules
+from urllib import request
 from operator import itemgetter
 import matplotlib.pyplot as plt
 import numpy as np
-
-
-nom_fichier = "vacsi-a-fra-2021-08-30-19h05.csv"                                #Nom du fichier de données à traiter
+import os
 
 #Paramètres du graphique
 limite_date_debut = "2021-01-01"                                                #Indique la première date des données (0 pour conserver la liste)
@@ -86,10 +85,16 @@ def analyseListeDonnees(liste_dates, liste_courbes):
     if max(liste_nb_element_courbe) != len(liste_courbes[numero_passage_courbe]): return True
     return False
 
+
+#Sauvegarde temporairement le fichier de données
+lines = str(request.urlopen("https://www.data.gouv.fr/fr/datasets/r/54dd5f8d-1e2e-4ccb-8fb8-eac68245befd").read()).strip("b'").split("\\n")
+fichier = open("fichier_temporaire.csv", "w")
+for line in lines: fichier.write(line + "\n")
+fichier.close()
+
 #Début du script
-fichier = open(nom_fichier,"r")                                                 #Ouvre le fichier
-ligne_descripteurs = fichier.readline()
-lst_descripteurs = ligne_descripteurs.rstrip().rsplit(";")                      #Sépare la première ligne (titres des colonnes) du reste des valeurs numériques
+fichier = open("fichier_temporaire.csv", "r")                                   #Ouvre le fichier
+ligne_descripteurs = fichier.readline().rstrip().rsplit(";")                    #Sépare la première ligne (titres des colonnes) du reste des valeurs numériques
 lignes = fichier.readlines()                                                    #Le reste est entreposée dans "lignes"
 table = []
 
@@ -97,17 +102,18 @@ empecher_valeurs_previsionnelles = False                                        
 limite_date_debut_existe = False                                                #Par défaut, ne pas supprimer des dates sans vérifier que la limite de début existe
 
 for ligne in lignes:
-    lst = ligne.rstrip().split(";")
-    del lst[0]                                                                  #Supression des valeurs du pays de l'injection (toutes dans le fichier sont en France)
-    lst[0] = int(lst[0])                                                        #Conversion de l'âge des vaccinés en nombre entier (de base une chaine de caractères)
-    del lst[2]                                                                  #Suppression des primo-injections quotidiennes
-    del lst[2]                                                                  #Suppression des injections complètes quotidiennes
-    lst[2] = int(lst[2])                                                        #Conversion du cumul des primo-injections en nombre entier
-    lst[3] = int(lst[3])                                                        #Conversion du cumul des injections complètes en nombre entier
-    del lst[4]                                                                  #Suppression du taux de primo-vaccinés en nombre entier
-    del lst[4]                                                                  #Suppression du taux de vaccinés en nombre entier
-    table.append(lst)
-    if lst[1] == limite_date_debut: limite_date_debut_existe = True             #Limiter le nombre de dates si la limite existe dans le fichier
+    ligne = ligne.rstrip().split(";")
+    if ligne[0] == "": break
+    del ligne[0]                                                                #Supression des valeurs du pays de l'injection (toutes dans le fichier sont en France)
+    ligne[0] = int(ligne[0])                                                    #Conversion de l'âge des vaccinés en nombre entier (de base une chaine de caractères)
+    del ligne[2]                                                                #Suppression des primo-injections quotidiennes
+    del ligne[2]                                                                #Suppression des injections complètes quotidiennes
+    ligne[2] = int(ligne[2])                                                    #Conversion du cumul des primo-injections en nombre entier
+    ligne[3] = int(ligne[3])                                                    #Conversion du cumul des injections complètes en nombre entier
+    del ligne[4]                                                                #Suppression du taux de primo-vaccinés en nombre entier
+    del ligne[4]                                                                #Suppression du taux de vaccinés en nombre entier
+    table.append(ligne)
+    if ligne[1] == limite_date_debut: limite_date_debut_existe = True           #Limiter le nombre de dates si la limite existe dans le fichier
 fichier.close()                                                                 #Ferme le fichier
 table = sorted(table, key=itemgetter(1, 0))                                     #Tri les données par date, puis par âge
 
@@ -198,6 +204,7 @@ for donnees in table:
 
 
 position_date_limite = len(liste_dates)-1                                       #Sauvegarde de la position du dernier jour dont on a les données
+dernier_jour = liste_dates[-1]
 
 
 #Début de la contruction du graphique
@@ -297,11 +304,15 @@ plt.grid()                                                                      
 plt.legend()                                                                    #Affiche les légendes associés à la courbe correspondante
 plt.margins(0, 0)                                                               #Force la disparition des marges intérieures
 
+print(dernier_jour[:4])
+
 #Défini les titres du graphe et des axes x et y, et ajoute des notes en bas du graphe
-plt.title(f"Avancement de la vaccination (données du {nom_fichier[20:22]}/{nom_fichier[17:19]}/{nom_fichier[12:16]})")
+plt.title(f"Avancement de la vaccination (dernières données datant du {dernier_jour[8:]}/{dernier_jour[5:7]}/{dernier_jour[:4]})")
 plt.xlabel(f"""Dates\n\nLes prévisions sont faites à partir des {formatNombre(nb_jour_prediction)} jours précédents. En considérant une population égale à celle indiquée par l'Insee en 2021.
 Source des données sur Data.gouv et code du graphique disponible sur https://github.com/A2drien/VaccineGraph.""")
 plt.ylabel("Pourcentage de vaccinés (%)")
 
 #Sauvegarde l'image avec la date des données et supprime et les marges exterieures
-plt.savefig(f"Objectifs Vaccination {nom_fichier[12:22]}.png", bbox_inches = 'tight')
+plt.savefig(f"Objectifs Vaccination {dernier_jour}.png", bbox_inches = 'tight')
+
+os.remove("fichier_temporaire.csv")
