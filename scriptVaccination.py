@@ -325,8 +325,9 @@ plt.legend()                                                                    
 plt.margins(0, 0)                                                               #Force la disparition des marges intérieures
 
 #Défini les titres du graphe et des axes x et y, et ajoute des notes en bas du graphe
-plt.title(f"Avancement de la vaccination (dernières données datant du {dernier_jour[8:]}/{dernier_jour[5:7]}/{dernier_jour[:4]})")
-plt.xlabel(f"""Dates\n\nLes prévisions sont faites à partir des {formatNombre(nb_jour_prediction)} jours précédents. En considérant une population égale à celle indiquée par l'Insee en 2021.
+plt.title(f"Avancement de la vaccination (données du {nom_fichier[20:22]}/{nom_fichier[17:19]}/{nom_fichier[12:16]})")
+plt.xlabel(f"""Dates\n\nDernier jour de remontée des données : {dernier_jour[8:]}/{dernier_jour[5:7]}/{dernier_jour[:4]}.
+Les prévisions sont faites à partir des {formatNombre(nb_jour_prediction)} jours précédents. En considérant une population égale à celle indiquée par l'Insee en 2021.
 Source des données sur Data.gouv et code du graphique disponible sur https://github.com/A2drien/VaccineGraph.""")
 plt.ylabel("Pourcentage de vaccinés (%)")
 
