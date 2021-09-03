@@ -250,6 +250,6 @@ plt.ylabel("Pourcentage atteint des objectifs (%)")
 
 #Sauvegarde l'image avec la date des données et supprime et les marges exterieures
 plt.savefig(f"Objectifs Gouvernement.png", bbox_inches = 'tight')
-plt.savefig(f"Archives Objectifs Gouvernement\Objectifs Gouvernement {nom_fichier[12:22]}.png", bbox_inches = 'tight')
+plt.savefig(f"Archives Objectifs Gouvernement/Objectifs Gouvernement {nom_fichier[12:22]}.png", bbox_inches = 'tight')
 
 os.remove("fichier_temporaire.html")
