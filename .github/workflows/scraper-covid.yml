@@ -1,8 +1,8 @@
-name: scraper-covid-france
+name: MAJ-data-gouv
 
 on:
   schedule:
-    - cron: '0 21 * * *' #Tourne à 21:00 UTC tous les jours (22:00/23:00 heure de Paris)
+    - cron: '0/5 17-19 * * *'                     #Runs every 10 minutes past the 17, 18 and 19th hour (UTC).
 
 jobs:
   build:
@@ -10,19 +10,19 @@ jobs:
     steps:
 
       - name: checkout repo content
-        uses: actions/checkout@v2 # checkout the repository content to github runner
+        uses: actions/checkout@v2                 #Checkout the repository content to github runner
 
       - name: setup python
         uses: actions/setup-python@v2
         with:
-          python-version: '3.x' # install the python version needed
+          python-version: '3.x'                   #Install the python version needed
           
       - name: install python packages
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           
-      - name: execute py script # run sj-gobierno.py to get the latest data
+      - name: execute py script
         run: python scriptVaccination.py
           
       - name: commit files
