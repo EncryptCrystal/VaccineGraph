@@ -2,7 +2,7 @@ name: MAJ-data-gouv
 
 on:
   schedule:
-    - cron: '0/5 17-19 * * *'                     #Runs every 5 minutes past the 17, 18 and 19th hour (UTC).
+    - cron: '0 19 * * *'                          #Runs at 19:00 UTC every day. (UTC).
 
 jobs:
   build:
