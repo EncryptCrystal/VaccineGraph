@@ -272,9 +272,8 @@ numero_passage_courbe = 0
 #Ajout des différents coefficients dans la liste adéquate
 for i in range(len(liste_courbes)): liste_coeff.append((liste_courbes[i][-1]-liste_courbes[i][-1-nb_jour_prediction])/nb_jour_prediction)
 
-#Tant que la proportion de vaccinés n'est pas de 100%, étendre le graphique
-#Si il n'y a pas de date limite de fin, alors créer des dates jusqu'à ce que les 100% de vaccinés soient atteints et/ou dépassés ET que la limite d'écart entre les dates soit respecté
-#Sinon, alors créer des dates jusqu'à ce que la date limite soit atteinte et/ou dépassée ET que la limite d'écart entre les dates soit respecté
+#Tant que les différentes courbes ne sont pas toutes au moins à 100% ET qu'elles ne sont pas au même nombre de point
+#ET que la limite d'écart entre les dates (s'il y en a une) n'est pas respectée, étendre le graphique
 while analyseListeDonnees(liste_dates, liste_courbes) or (limite_date_fin == 0 and (liste_courbes[numero_passage_courbe][-1] < 100 or ((len(liste_courbes[numero_passage_courbe])-1)%limite_ecart_jour) != 0))   or   (limite_date_fin != 0 and (limite_date_fin not in liste_dates or len(liste_dates) != len(liste_courbes[numero_passage_courbe]) or ((len(liste_courbes[numero_passage_courbe])-1)%limite_ecart_jour) != 0)):
     liste_courbes[numero_passage_courbe].append(liste_courbes[numero_passage_courbe][-1]+liste_coeff[numero_passage_courbe])
     if len(liste_courbes[numero_passage_courbe]) > len(liste_dates):
