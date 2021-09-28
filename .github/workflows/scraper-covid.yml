@@ -30,7 +30,11 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add -A
-          git diff --exit-code || git commit -m "Update des données" -a
+          git commit -m "Update des données" -a
+      
+      -name: Commit files (failure)
+        run: |
+          git diff --exit-code
           
       - name: Push changes
         uses: ad-m/github-push-action@v0.6.0
