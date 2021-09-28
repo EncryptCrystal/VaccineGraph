@@ -10,7 +10,7 @@ import os
 limite_date_debut = "2021-01-01"                                                #Indique la première date des données (0 pour conserver la liste)
 limite_date_fin = 0                                                             #Exclure les données à partir d'une certaine date (0 pour conserver la liste)
 limite_nombre_jour = 0                                                          #Indique le nombre de dates à inscrire sur l'axe des abscisses (0 ou 1 conserve la liste)
-limite_ecart_jour = 14                                                           #Espace de n jours les dates (1 pour conserver la liste)
+limite_ecart_jour = 14                                                          #Espace de n jours les dates (1 pour conserver la liste)
 nb_jour_prediction = 7                                                          #Fait des prévisions sur les jours suivants à partir des n derniers jours
 seuil_immunite_collective = 0.90                                                #Définit le seuil d'immunité collective (trace une ligne honrizontale à ce pourcentage)
 y_min = 0                                                                       #Définit le pourcentage minimum affiché
