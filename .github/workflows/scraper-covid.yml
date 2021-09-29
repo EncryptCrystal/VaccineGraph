@@ -33,6 +33,7 @@ jobs:
           git commit -m "Update des données" -a
       
       - name: Commit files (failure)
+        if: ${{ failure() }}
         run: |
           git diff --exit-code
           
