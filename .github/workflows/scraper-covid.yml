@@ -32,7 +32,7 @@ jobs:
           git add -A
           git commit -m "Update des données" -a
       
-      -name: Commit files (failure)
+      - name: Commit files (failure)
         run: |
           git diff --exit-code
           
