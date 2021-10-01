@@ -31,14 +31,14 @@ jobs:
           git config --local user.name "GitHub Action"
           git add -A
           git commit -m "Update des données" -a
-      
-      - name: Commit files (failure)
-        if: ${{ failure() }}
-        run: |
-          git diff --exit-code
           
       - name: Push changes
         uses: ad-m/github-push-action@v0.6.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: master
+      
+      - name: Commit files (failure)
+        if: ${{ failure() }}
+        run: |
+          git diff --exit-code
