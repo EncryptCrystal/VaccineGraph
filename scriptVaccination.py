@@ -7,31 +7,33 @@ import numpy as np
 import os
 
 #Paramètres du graphique
-limite_date_debut = "2021-01-01"                                                #Indique la première date des données (0 pour conserver la liste)
-limite_date_fin = 0                                                             #Exclure les données à partir d'une certaine date (0 pour conserver la liste)
-limite_nombre_jour = 0                                                          #Indique le nombre de dates à inscrire sur l'axe des abscisses (0 ou 1 conserve la liste)
-limite_ecart_jour = 14                                                          #Espace de n jours les dates (1 pour conserver la liste)
-nb_jour_prediction = 7                                                          #Fait des prévisions sur les jours suivants à partir des n derniers jours
-seuil_immunite_collective = 0.90                                                #Définit le seuil d'immunité collective (trace une ligne honrizontale à ce pourcentage)
-y_min = 0                                                                       #Définit le pourcentage minimum affiché
-y_max = 100                                                                     #Définit le pourcentage maximum affiché
+limiteDateDebut = "2021-01-01"                                                  #Indique la première date des données (0 pour conserver la liste)
+limiteDateFin = 0                                                               #Exclure les données à partir d'une certaine date (0 pour conserver la liste)
+limiteNombreJour = 0                                                            #Indique le nombre de dates à inscrire sur l'axe des abscisses (0 ou 1 conserve la liste)
+limiteEcartJour = 14                                                            #Espace de n jours les dates (1 pour conserver la liste)
+nbJourPrediction = 7                                                            #Fait des prévisions sur les jours suivants à partir des n derniers jours
+seuilImmuniteCollective = 0.90                                                  #Définit le seuil d'immunité collective (trace une ligne honrizontale à ce pourcentage)
+yMin = 0                                                                        #Définit le pourcentage minimum affiché
+yMax = 100                                                                      #Définit le pourcentage maximum affiché
 
 #Paramètres du fichier de données
-lieu_telechargement = "Archives Données/"
+lieuTelechargement = "Archives Données/"                                        #Répertoire où sont entreposés les fichiers de données
 
 #Liste des courbes demandées, en format (age minimal, age maximal, nb de doses, si la courbe doit obligatoirement aller jusqu'aux 100%, couleur du tracé)
-liste_courbes = [   ( 0, 80, 1, False, "red"),
-                    ( 0, 80, 2, True, "brown"),
-                    (60, 80, 1, False, "cyan"),
-                    (60, 80, 2, False, "darkblue"),
-                    (18, 59, 1, False, "yellow"),
-                    (18, 59, 2, False, "orange"),
-                    (12, 17, 1, False, "lawngreen"),
-                    (12, 17, 2, False, "darkgreen")]
+listeCourbes = [( 0, 80, 1, False, "red"),
+                ( 0, 80, 2, True, "brown"),
+                (12, 80, 1, False, "pink"),
+                (12, 80, 2, True, "purple"),
+                (60, 80, 1, False, "cyan"),
+                (60, 80, 2, False, "darkblue"),
+                (18, 59, 1, False, "yellow"),
+                (18, 59, 2, False, "orange"),
+                (12, 17, 1, False, "lawngreen"),
+                (12, 17, 2, False, "darkgreen")]
 
 #Données sur la population en format (age minimal conserné, population de la tranche d'âge) (Insee, 2021)
 #(https://www.insee.fr/fr/outil-interactif/5367857/details/20_DEM/21_POP/21C_Figure3#)
-liste_donnees_population = [( 0, 3632671),
+listeDonneesPopulation = [( 0, 3632671),
                             ( 5, 4069407),
                             (10, 1703491),
                             (12, 5070658),
@@ -46,30 +48,30 @@ liste_donnees_population = [( 0, 3632671),
                             (75, 2276900),
                             (80, 4132668)]
 
-#Sert à limiter une liste à limite_nombre_jour de manière uniforme
+#Sert à limiter une liste à limiteNombreJour de manière uniforme
 def reduction(liste):
-    if limite_nombre_jour == 0 or limite_nombre_jour == 1: return liste         #limite_nombre_jour ne doit pas être égal à 0 ou 1 (risque d'erreur)
-    liste_compressee = []
-    coeff = len(liste)/(limite_nombre_jour-1)                                   #Calcule l'écart idéal entre 2 éléments de la liste à compresser
-    liste_compressee.append(liste[0])                                           #Ajoute le premier élement de la liste à compresser
+    if limiteNombreJour == 0 or limiteNombreJour == 1: return liste             #limiteNombreJour ne doit pas être égal à 0 ou 1 (risque d'erreur)
+    listeCompressee = []
+    coeff = len(liste)/(limiteNombreJour-1)                                     #Calcule l'écart idéal entre 2 éléments de la liste à compresser
+    listeCompressee.append(liste[0])                                            #Ajoute le premier élement de la liste à compresser
     for i in range(len(liste)):
-        if int(i/coeff) == len(liste_compressee):                               #Si la position de l'élément est supérieure ou égale à sa position dans la liste compressée
-            liste_compressee.append(liste[i-1])                                 #Alors ajouter l'élement à la liste compressée
-    liste_compressee.append(liste[-1])                                          #Ajoute le dernier élement de la liste dans la liste à compresser
-    return liste_compressee
+        if int(i/coeff) == len(listeCompressee):                                #Si la position de l'élément est supérieure ou égale à sa position dans la liste compressée
+            listeCompressee.append(liste[i-1])                                  #Alors ajouter l'élement à la liste compressée
+    listeCompressee.append(liste[-1])                                           #Ajoute le dernier élement de la liste dans la liste à compresser
+    return listeCompressee
 
 #Sert à la projection des courbes
 def projectionObjectif(liste):
-    coeff = (liste[-1]-liste[-1-nb_jour_prediction])/nb_jour_prediction         #Évolution de la courbe calculé à partir des 7 derniers jours
-    while len(liste_dates) != len(liste): liste.append(liste[-1]+coeff)         #Tant que la projection n'égale pas la date de fin, continuer la projection
+    coeff = (liste[-1]-liste[-1-nbJourPrediction])/nbJourPrediction             #Évolution de la courbe calculé à partir des n derniers jours
+    while len(listeDates) != len(liste): liste.append(liste[-1]+coeff)          #Tant que la projection n'égale pas la date de fin, continuer la projection
     return liste
 
-#Sert à espacer les dates selon limite_ecart_jour
+#Sert à espacer les dates selon limiteEcartJour
 def ecartDate(liste):
-    new_liste = []
+    newListe = []
     for i in range(len(liste)):
-        if i % limite_ecart_jour == 0: new_liste.append(liste[i])
-    return new_liste
+        if i % limiteEcartJour == 0: newListe.append(liste[i])
+    return newListe
 
 #Sert à séparer les nombres par milliers, millions...
 def formatNombre(nombre):
@@ -82,51 +84,56 @@ def formatNombre(nombre):
     return nombre
 
 #Analyse les courbes afin de définir s'il faut continuer d'allonger le graphique
-def analyseListeDonnees(liste_dates, liste_courbes):
-    liste_nb_element_courbe = []
+def analyseListeDonnees(listeDates, listeCourbes):
+    listeNbElementCourbe = []
 
     #Tant que que chacune ne comporte pas autant d'éléments que la liste des dates
-    for courbe in liste_courbes:
-        liste_nb_element_courbe.append(len(courbe))
-        if len(courbe) != len(liste_dates): return True
+    for courbe in listeCourbes:
+        listeNbElementCourbe.append(len(courbe))
+        if len(courbe) != len(listeDates): return True
 
     #ET que la courbe actuelle n'est pas celle qui a le maximum de points, continuer la boucle
-    if max(liste_nb_element_courbe) != len(liste_courbes[numero_passage_courbe]): return True
+    if max(listeNbElementCourbe) != len(listeCourbes[numeroPassageCourbe]): return True
     
     return False
 
+#!!!
+def analyseLongueurCourbe(listeCourbes):
+    for i in range(len(listeCourbes)):
+        if True: None
+    return None
 
 #Sauvegarde temporairement le fichier de données
 lignes = str(urllib.request.urlopen("https://www.data.gouv.fr/fr/datasets/donnees-relatives-aux-personnes-vaccinees-contre-la-covid-19-1/").read()).strip("b'").split("\\n")
-fichier = open("fichier_temporaire.html", "w")
+fichier = open("fichierTemporaire.html", "w")
 
 for ligne in lignes:
     if "vacsi-a-fra-" in ligne and "vacsi-a-fra-YYYY-MM-DD-HHhmm.csv" not in ligne:
         for i in range(len(ligne)-32):
-            nom_fichier = ligne[i:i+12]
-            if nom_fichier == "vacsi-a-fra-":
-                nom_fichier = ligne[i:i+32]
+            nomFichier = ligne[i:i+12]
+            if nomFichier == "vacsi-a-fra-":
+                nomFichier = ligne[i:i+32]
                 break
 fichier.close()
 
-if os.path.exists(lieu_telechargement+nom_fichier) == False:
+if os.path.exists(lieuTelechargement+nomFichier) == False:
     lignes = str(request.urlopen("https://www.data.gouv.fr/fr/datasets/r/54dd5f8d-1e2e-4ccb-8fb8-eac68245befd").read()).strip("b'").split("\\n")
-    fichier = open(lieu_telechargement+nom_fichier, "w")
+    fichier = open(lieuTelechargement+nomFichier, "w")
     for ligne in lignes: fichier.write(ligne + "\n")
     fichier.close()
 
 #Début du script
-fichier = open(lieu_telechargement+nom_fichier, "r")                            #Ouvre le fichier
-ligne_descripteurs = fichier.readline().rstrip().rsplit(";")                    #Sépare la première ligne (titres des colonnes) du reste des valeurs numériques
+fichier = open(lieuTelechargement+nomFichier, "r")                              #Ouvre le fichier
+ligneDescripteurs = fichier.readline().rstrip().rsplit(";")                     #Sépare la première ligne (titres des colonnes) du reste des valeurs numériques
 lignes = fichier.readlines()                                                    #Le reste est entreposée dans "lignes"
 table = []
 
-empecher_valeurs_previsionnelles = False                                        #Par défaut, ne pas empêcher de tracer les valeurs prévisionnelles
-limite_date_debut_existe = False                                                #Par défaut, ne pas supprimer des dates sans vérifier que la limite de début existe
+empecherValeursPrevisionnelles = False                                          #Par défaut, ne pas empêcher de tracer les valeurs prévisionnelles
+limiteDateDebutExiste = False                                                   #Par défaut, ne pas supprimer des dates sans vérifier que la limite de début existe
 
 for ligne in lignes:
     ligne = ligne.rstrip().split(";")
-    if ligne[0] == "": break
+    if ligne[0] == "": break                                                    #Une ligne vide correspond à la fin du fichier csv : on sort de la boucle
     del ligne[0]                                                                #Supression des valeurs du pays de l'injection (toutes dans le fichier sont en France)
     ligne[0] = int(ligne[0])                                                    #Conversion de l'âge des vaccinés en nombre entier (de base une chaine de caractères)
     del ligne[2]                                                                #Suppression des primo-injections quotidiennes
@@ -136,108 +143,105 @@ for ligne in lignes:
     del ligne[4]                                                                #Suppression du taux de primo-vaccinés en nombre entier
     del ligne[4]                                                                #Suppression du taux de vaccinés en nombre entier
     table.append(ligne)
-    if ligne[1] == limite_date_debut: limite_date_debut_existe = True           #Limiter le nombre de dates si la limite existe dans le fichier
+    if ligne[1] == limiteDateDebut: limiteDateDebutExiste = True                #Limiter le nombre de dates si la limite existe dans le fichier
 fichier.close()                                                                 #Ferme le fichier
 table = sorted(table, key=itemgetter(1, 0))                                     #Tri les données par date, puis par âge
 
 #Tant que la date limite de début n'est pas atteinte et si elle existe, continuer de supprimer les données
-while limite_date_debut_existe and table[0][1] != limite_date_debut: del table[0]
+while limiteDateDebutExiste and table[0][1] != limiteDateDebut: del table[0]
 
 #Vérifie la présense de données de données ultérieurs à la date limite de fin
 for i in range(len(table)):
-    if table[i][1] == limite_date_fin:                                          #Si c'est le cas...
+    if table[i][1] == limiteDateFin:                                            #Si c'est le cas...
         del table[i+15:]                                                        #Supprime ces données
-        empecher_valeurs_previsionnelles = True                                 #Empeche la signalisation des valeurs prévisionelles (pas besoin)
+        empecherValeursPrevisionnelles = True                                   #Empeche la signalisation des valeurs prévisionelles (pas besoin)
         break                                                                   #Casse la boucle et empêche d'éventuelles erreurs
 
 #Initialisation des variables des dates et des 7 autres courbes
-liste_dates = []                                                                #Stocke la liste des dates en abscisse
-liste_donnees = []                                                              #Stocke la liste des données par jour et par âge
+listeDates = []                                                                 #Stocke la liste des dates en abscisse
+listeDonnees = []                                                               #Stocke la liste des données par jour et par âge
 
-for i in range(28): liste_donnees.append([])                                    #Ajout de listes vides sur lesquelles ajouter les données par âge
+for i in range(28): listeDonnees.append([])                                     #Ajout de listes vides sur lesquelles ajouter les données par âge
 
 #Répartit les données dans les différentes listes
 for donnees in table:
     #Afin de faciliter la compréhension du code, les 4 colonnes sont assignés à des variables
     age = donnees[0]
     date = donnees[1]
-    primo_injections = donnees[2]
-    injections_completes = donnees[3]
+    primoInjections = donnees[2]
+    injectionsCompletes = donnees[3]
 
     #Dans le cas où la ligne concerne les injections tout âge confondu...
     if age == 0:
-        liste_dates.append(date)
+        listeDates.append(date)
     
     #Dans le cas où la ligne concerne les injections de personnes entre 0 et 79 ans...
     elif 4 <= age <= 79:
-        for i in range(len(liste_donnees_population)-1):
-            if age == int(liste_donnees_population[i+1][0])-1:
-                liste_donnees[i*2].append(primo_injections)
-                liste_donnees[i*2+1].append(injections_completes)
+        for i in range(len(listeDonneesPopulation)-1):
+            if age == int(listeDonneesPopulation[i+1][0])-1:
+                listeDonnees[i*2].append(primoInjections)
+                listeDonnees[i*2+1].append(injectionsCompletes)
     
     #Dans le cas où la ligne concerne les injections de personnes de plus de 80 ans...
     else:
-        liste_donnees[26].append(primo_injections)
-        liste_donnees[27].append(injections_completes)
+        listeDonnees[26].append(primoInjections)
+        listeDonnees[27].append(injectionsCompletes)
 
 
-position_date_limite = len(liste_dates)-1                                       #Sauvegarde de la position du dernier jour dont on a les données
-dernier_jour = liste_dates[-1]                                                  #Sauvegarde le dernier jour dont on a les données
-
-
-#Début de la contruction du graphique
-plt.figure(figsize = (16, 5))                                                   #Définit une dimension en 16/5
-plt.tick_params(axis = 'x', rotation = 80)                                      #Tourne les dates à 80° afin qu'elles restent visibles
+positionDateLimite = len(listeDates)-1                                          #Sauvegarde de la position du dernier jour dont on a les données
+dernierJour = listeDates[-1]                                                    #Sauvegarde le dernier jour dont on a les données
 
 
 #Trace les courbes
-liste_titre = []
-liste_couleur = []
+listeNomCourbe = []                                                             #Liste contenant l'ensemble des noms des différentes courbes
+listeRoadTo100 = []                                                             #Liste contenant la demande (ou non) pour une courbe d'étirer la courbe jusqu'à ses 100%
+listeCouleur = []                                                               #Liste contenant l'ensemble des couleurs des différentes courbes
 
-for courbe in liste_courbes:                                                    #On prend une à une les courbes demandées
-    courbe_finale = [0]*len(liste_donnees[0])                                   #Contient le nombre final d'injection pour l'ensemble des tranches d'âge demandées
-    population_totale = 0                                                       #Variable contenant la population totale consernée par la courbe actuelle
-    liste_age = []                                                              #Contient les différentes tranches d'âge de l'ensemble des tranches d'âge demandées
-    for position_age in range(len(liste_donnees_population)):                   #On balaye la liste de données de population pour savoir si l'âge appartient à l'ensemble des tranches d'âge demandées, et si c'est le cas :
-        if courbe[0] <= liste_donnees_population[position_age][0] < courbe[1] or liste_donnees_population[position_age][0] == 80 == courbe[1]:
-            population_totale += liste_donnees_population[position_age][1]      #Ajouter la population sélectionnée au total de population consernée
-            liste_age.append(liste_donnees_population[position_age][0])         #Ajouter à la liste des âges utilisées le plus petit âge de l'ensemble des tranches d'âge demandées
-            for i in range(len(liste_donnees[0])):                              #Additionner les injections à la courbe totale, en prenant en compte la distanction primo-injection/injecction finale
-                courbe_finale[i] += liste_donnees[position_age*2+courbe[2]-1][i]
+for courbe in listeCourbes:                                                     #On prend une à une les courbes demandées
+    courbeFinale = [0]*len(listeDonnees[0])                                     #Contient le nombre final d'injection pour l'ensemble des tranches d'âge demandées
+    populationConsernee = 0                                                     #Variable contenant la population totale consernée par la courbe actuelle
+    listeAge = []                                                               #Contient les différentes tranches d'âge de l'ensemble des tranches d'âge demandées
+    for positionAge in range(len(listeDonneesPopulation)):                      #On balaye la liste de données de population pour savoir si l'âge appartient à l'ensemble des tranches d'âge demandées, et si c'est le cas :
+        if courbe[0] <= listeDonneesPopulation[positionAge][0] < courbe[1] or listeDonneesPopulation[positionAge][0] == 80 == courbe[1]:
+            populationConsernee += listeDonneesPopulation[positionAge][1]       #Ajouter la population sélectionnée au total de population consernée
+            listeAge.append(listeDonneesPopulation[positionAge][0])             #Ajouter à la liste des âges utilisées le plus petit âge de l'ensemble des tranches d'âge demandées
+            for i in range(len(listeDonnees[0])):                               #Additionner les injections à la courbe totale, en prenant en compte la distanction primo-injection/injecction finale
+                courbeFinale[i] += listeDonnees[positionAge*2+courbe[2]-1][i]
     
     #Les données passent du nombre d'injection au pourcentage de population
-    for i in range(len(courbe_finale)): courbe_finale[i] = 100*courbe_finale[i]/population_totale
+    for i in range(len(courbeFinale)): courbeFinale[i] = 100*courbeFinale[i]/populationConsernee
 
     #Si l'âge maximal n'est pas 80 ans, recherchez quelle est la classe d'âge supérieure, et y retirer 1
     #Ceci pour éviter que la tranche x-y ans, y appartienne à une autre tranche d'âge
-    if liste_age[-1] != 80:
-        for i in range(len(liste_donnees_population)):
-            if liste_donnees_population[i][0] == liste_age[-1]:
-                liste_age.append(liste_donnees_population[i+1][0]-1)
+    if listeAge[-1] != 80:
+        for i in range(len(listeDonneesPopulation)):
+            if listeDonneesPopulation[i][0] == listeAge[-1]:
+                listeAge.append(listeDonneesPopulation[i+1][0]-1)
     
-    if liste_age[0] == 0 and liste_age[-1] == 80: titre = "Français"            #Si la part d'âge demandée couvre l'ensemble des Français, alors mettre "Français" dans le titre
-    elif liste_age[-1] == 80: titre = f"+{liste_age[0]} ans"                    #Sinon, si la tranche d'âge demandée va jusqu'à l'âge maximal, mettre "+[âge minimal]" dans le titre
-    else: titre = f"{liste_age[0]}-{liste_age[-1]} ans"                         #Sinon, mettre "[âge minimal]-[âge maximal]" dans le titre
+    if listeAge[0] == 0 and listeAge[-1] == 80: titre = "Français"              #Si la part d'âge demandée couvre l'ensemble des Français, alors mettre "Français" dans le titre
+    elif listeAge[-1] == 80: titre = f"+{listeAge[0]} ans"                      #Sinon, si la tranche d'âge demandée va jusqu'à l'âge maximal, mettre "+[âge minimal]" dans le titre
+    else: titre = f"{listeAge[0]}-{listeAge[-1]} ans"                           #Sinon, mettre "[âge minimal]-[âge maximal]" dans le titre
     
     if courbe[2] == 1: titre += " primo-vaccinés"
     else: titre += " vaccinés"
     
-    liste_titre.append(titre)
-    liste_couleur.append(courbe[4])
-    liste_courbes[liste_courbes.index(courbe)] = courbe_finale
+    listeNomCourbe.append(titre)                                                #Ajout du titre de chaque courbe dans une liste à part
+    listeRoadTo100.append(courbe[3])                                            #Ajout de la demande (ou non) pour une courbe d'étirer la courbe jusqu'à ses 100%
+    listeCouleur.append(courbe[4])                                              #Ajout de la couleur de chaque courbe dans une liste à part
+    listeCourbes[listeCourbes.index(courbe)] = courbeFinale
 
 
-liste_coeff = []
-numero_passage_courbe = 0
+listeCoeff = []                                                                 #Liste contenant le coefficient d'évolution de chaque courbe des n derniers jours
+numeroPassageCourbe = 0
 
 #Ajout des différents coefficients dans la liste adéquate
-for i in range(len(liste_courbes)): liste_coeff.append((liste_courbes[i][-1]-liste_courbes[i][-1-nb_jour_prediction])/nb_jour_prediction)
+for i in range(len(listeCourbes)): listeCoeff.append((listeCourbes[i][-1]-listeCourbes[i][-1-nbJourPrediction])/nbJourPrediction)
 
 #Tant que les différentes courbes ne sont pas toutes au moins à 100% ET qu'elles ne sont pas au même nombre de point
 #ET que la limite d'écart entre les dates (s'il y en a une) n'est pas respectée, étendre le graphique
-while analyseListeDonnees(liste_dates, liste_courbes) or (limite_date_fin == 0 and (liste_courbes[numero_passage_courbe][-1] < 100 or ((len(liste_courbes[numero_passage_courbe])-1)%limite_ecart_jour) != 0))   or   (limite_date_fin != 0 and (limite_date_fin not in liste_dates or len(liste_dates) != len(liste_courbes[numero_passage_courbe]) or ((len(liste_courbes[numero_passage_courbe])-1)%limite_ecart_jour) != 0)):
-    liste_courbes[numero_passage_courbe].append(liste_courbes[numero_passage_courbe][-1]+liste_coeff[numero_passage_courbe])
-    if len(liste_courbes[numero_passage_courbe]) > len(liste_dates):
+while analyseListeDonnees(listeDates, listeCourbes) or (limiteDateFin == 0 and (listeCourbes[numeroPassageCourbe][-1] < 100 or ((len(listeCourbes[numeroPassageCourbe])-1)%limiteEcartJour) != 0))   or   (limiteDateFin != 0 and (limiteDateFin not in listeDates or len(listeDates) != len(listeCourbes[numeroPassageCourbe]) or ((len(listeCourbes[numeroPassageCourbe])-1)%limiteEcartJour) != 0)):
+    listeCourbes[numeroPassageCourbe].append(listeCourbes[numeroPassageCourbe][-1]+listeCoeff[numeroPassageCourbe])
+    if len(listeCourbes[numeroPassageCourbe]) > len(listeDates):
             date = date[0:8] + str(int(date[8:])+1)
             if len(date[8:]) == 1: date = date[0:8] + "0" + date[-1] 
             if date[5:7] == "01" and date[8:10] == "32": date = date[0:5] + "02-01"
@@ -253,48 +257,52 @@ while analyseListeDonnees(liste_dates, liste_courbes) or (limite_date_fin == 0 a
             elif date[5:7] == "10" and date[8:10] == "32": date = date[0:5] + "11-01"
             elif date[5:7] == "11" and date[8:10] == "31": date = date[0:5] + "12-01"
             elif date[5:7] == "12" and date[8:10] == "32": date = str(int(date[0:4])+1) + "-01-01"
-            liste_dates.append(date)
-    numero_passage_courbe = (numero_passage_courbe + 1)%len(liste_courbes)
+            listeDates.append(date)
+    numeroPassageCourbe = (numeroPassageCourbe + 1)%len(listeCourbes)
 
 #Passe le format de toutes les dates : AAAA-MM-JJ -> JJ/MM
-for i in range(len(liste_dates)): liste_dates[i] = liste_dates[i][8:11]+"/"+liste_dates[i][5:7]
+for i in range(len(listeDates)): listeDates[i] = listeDates[i][8:11]+"/"+listeDates[i][5:7]
 
-liste_dates_reduite = ecartDate(reduction(liste_dates))                         #Réduit la liste de dates tout en conservant l'original
+listeDatesReduite = ecartDate(reduction(listeDates))                            #Réduit la liste de dates tout en conservant l'original
 
-#Trace les courbes continues (données factuelles) et pointillées (données prévisionnelles)
-#pour chaque ensemble de données
-for i in range(len(liste_courbes)):
-    plt.plot(liste_dates_reduite[:position_date_limite//limite_ecart_jour+1], ecartDate(reduction(projectionObjectif(liste_courbes[i])))[:position_date_limite//limite_ecart_jour+1], liste_couleur[i], label = liste_titre[i])
-    plt.plot(liste_dates_reduite[position_date_limite//limite_ecart_jour:], ecartDate(reduction(projectionObjectif(liste_courbes[i])))[position_date_limite//limite_ecart_jour:], liste_couleur[i], linestyle = '--')
+
+#Début de la contruction du graphique
+plt.figure(figsize = (16, 5))                                                   #Définit une dimension en 16/5
+plt.tick_params(axis = 'x', rotation = 80)                                      #Tourne les dates à 80° afin qu'elles restent visibles
+
+#Trace les courbes continues (données factuelles) et pointillées (données prévisionnelles) pour chaque ensemble de données
+for i in range(len(listeCourbes)):
+    plt.plot(listeDatesReduite[:positionDateLimite//limiteEcartJour+1], ecartDate(reduction(projectionObjectif(listeCourbes[i])))[:positionDateLimite//limiteEcartJour+1], listeCouleur[i], label = listeNomCourbe[i])
+    plt.plot(listeDatesReduite[positionDateLimite//limiteEcartJour:], ecartDate(reduction(projectionObjectif(listeCourbes[i])))[positionDateLimite//limiteEcartJour:], listeCouleur[i], linestyle = '--')
 
 
 #Trace une ligne de pointillé horizontale au niveau des 100% si le seuil d'immunité collective n'est pas égal à 0% ou 100%
 #et affiche un texte sur le seuil actuel supposé
-if 0 < seuil_immunite_collective < 100:
-    plt.axhline(y = 100 * seuil_immunite_collective, color = 'black', linestyle = '--')
-    plt.text(len(liste_dates_reduite)/2, 100 * seuil_immunite_collective + 1.2, f"Seuil d'immunité collective ({int(seuil_immunite_collective*100)}%)", horizontalalignment = 'center')
+if 0 < seuilImmuniteCollective < 100:
+    plt.axhline(y = 100 * seuilImmuniteCollective, color = 'black', linestyle = '--')
+    plt.text(len(listeDatesReduite)/2, 100 * seuilImmuniteCollective + 1.2, f"Seuil d'immunité collective ({int(seuilImmuniteCollective*100)}%)", horizontalalignment = 'center')
 
 #Trace une zone en gris clair délimitée par une ligne verticale en pointillé pour désigner les prédictions
 #des courbes (si les données n'ont pas été raccourcies)
-if empecher_valeurs_previsionnelles == False:
-    plt.axvline(x = liste_dates_reduite[position_date_limite//limite_ecart_jour], color = 'gray', linestyle = '--')
-    plt.axvspan(liste_dates_reduite[position_date_limite//limite_ecart_jour], liste_dates_reduite[-1], alpha = 0.5, color = 'lightgray')
+if empecherValeursPrevisionnelles == False:
+    plt.axvline(x = listeDatesReduite[positionDateLimite//limiteEcartJour], color = 'gray', linestyle = '--')
+    plt.axvspan(listeDatesReduite[positionDateLimite//limiteEcartJour], listeDatesReduite[-1], alpha = 0.5, color = 'lightgray')
 
-plt.yticks(np.arange(y_min, y_max+0.01, 10))                                    #Limite le maximum en y à 105% et force la création de jalons de 10%
-plt.ylim(y_min, y_max+0.01)                                                     #Force le tableau à n'afficher y qu'entre 0% et 105%
+plt.yticks(np.arange(yMin, yMax+0.01, 10))                                      #Limite le maximum en y à 105% et force la création de jalons de 10%
+plt.ylim(yMin, yMax+0.01)                                                       #Force le tableau à n'afficher y qu'entre 0% et 105%
 
 plt.grid()                                                                      #Ajout d'un grillage
 plt.legend()                                                                    #Affiche les légendes associés à la courbe correspondante
 plt.margins(0, 0)                                                               #Force la disparition des marges intérieures
 
 #Défini les titres du graphe et des axes x et y, et ajoute des notes en bas du graphe
-plt.title(f"Avancement de la vaccination (données du {nom_fichier[20:22]}/{nom_fichier[17:19]}/{nom_fichier[12:16]})")
-plt.xlabel(f"""Dates\n\nLes prévisions sont faites à partir des {formatNombre(nb_jour_prediction)} jours précédents. En considérant une répartition de la population égale à celle indiquée par l'Insee en 2021.
-Dernier jour de remontée des données : {dernier_jour[8:]}/{dernier_jour[5:7]}/{dernier_jour[:4]}. Source des données sur Data.gouv et code du graphique disponible sur https://github.com/A2drien/VaccineGraph.""")
+plt.title(f"Avancement de la vaccination (données du {nomFichier[20:22]}/{nomFichier[17:19]}/{nomFichier[12:16]})")
+plt.xlabel(f"""Dates\n\nLes prévisions sont faites à partir des {formatNombre(nbJourPrediction)} jours précédents. En considérant une répartition de la population égale à celle indiquée par l'Insee en 2021.
+Dernier jour de remontée des données : {dernierJour[8:]}/{dernierJour[5:7]}/{dernierJour[:4]}. Source des données sur Data.gouv et code du graphique disponible sur https://github.com/A2drien/VaccineGraph.""")
 plt.ylabel("Pourcentage de vaccinés (%)")
 
 #Sauvegarde l'image (avec la date des données dans les archives) et supprime les marges exterieures
 plt.savefig(f"Objectifs Vaccination.png", bbox_inches = 'tight')
-plt.savefig(f"Archives Objectifs Vaccination/Objectifs Vaccination {nom_fichier[12:22]}.png", bbox_inches = 'tight')
+plt.savefig(f"Archives Objectifs Vaccination/Objectifs Vaccination {nomFichier[12:22]}.png", bbox_inches = 'tight')
 
-os.remove("fichier_temporaire.html")
+os.remove("fichierTemporaire.html")
