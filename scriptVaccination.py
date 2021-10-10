@@ -19,17 +19,18 @@ y_max = 100                                                                     
 #Paramètres du fichier de données
 lieu_telechargement = "Archives Données/"
 
-#Liste des courbes demandées, en format (age minimal, age maximal, nb de doses, couleur du tracé)
-liste_courbes = [   ( 0, 80, 1, "red"),
-                    ( 0, 80, 2, "brown"),
-                    (60, 80, 1, "cyan"),
-                    (60, 80, 2, "darkblue"),
-                    (18, 59, 1, "yellow"),
-                    (18, 59, 2, "orange"),
-                    (12, 17, 1, "lawngreen"),
-                    (12, 17, 2, "darkgreen")]
+#Liste des courbes demandées, en format (age minimal, age maximal, nb de doses, si la courbe doit obligatoirement aller jusqu'aux 100%, couleur du tracé)
+liste_courbes = [   ( 0, 80, 1, False, "red"),
+                    ( 0, 80, 2, True, "brown"),
+                    (60, 80, 1, False, "cyan"),
+                    (60, 80, 2, False, "darkblue"),
+                    (18, 59, 1, False, "yellow"),
+                    (18, 59, 2, False, "orange"),
+                    (12, 17, 1, False, "lawngreen"),
+                    (12, 17, 2, False, "darkgreen")]
 
-#Données sur la population en format (age minimal conserné, population de la tranche d'âge) (Insee, 2021) (https://www.insee.fr/fr/outil-interactif/5367857/details/20_DEM/21_POP/21C_Figure3#)
+#Données sur la population en format (age minimal conserné, population de la tranche d'âge) (Insee, 2021)
+#(https://www.insee.fr/fr/outil-interactif/5367857/details/20_DEM/21_POP/21C_Figure3#)
 liste_donnees_population = [( 0, 3632671),
                             ( 5, 4069407),
                             (10, 1703491),
@@ -80,13 +81,18 @@ def formatNombre(nombre):
             j += 1
     return nombre
 
-#Tant que chacune des courbes n'atteint pas 100 ET que chacune comporte autant d'éléments que la liste des dates ET que la courbe actuelle n'est pas celle qui a le maximum de points, continuer la boucle
+#Analyse les courbes afin de définir s'il faut continuer d'allonger le graphique
 def analyseListeDonnees(liste_dates, liste_courbes):
     liste_nb_element_courbe = []
+
+    #Tant que que chacune ne comporte pas autant d'éléments que la liste des dates
     for courbe in liste_courbes:
         liste_nb_element_courbe.append(len(courbe))
         if len(courbe) != len(liste_dates): return True
+
+    #ET que la courbe actuelle n'est pas celle qui a le maximum de points, continuer la boucle
     if max(liste_nb_element_courbe) != len(liste_courbes[numero_passage_courbe]): return True
+    
     return False
 
 
@@ -162,66 +168,21 @@ for donnees in table:
     if age == 0:
         liste_dates.append(date)
     
-    #Dans le cas où la ligne concerne les injections de personnes entre 0 et 4 ans...
-    elif age == 4:
-        liste_donnees[0].append(primo_injections)
-        liste_donnees[1].append(injections_completes)
-
-    elif age == 9:
-        liste_donnees[2].append(primo_injections)
-        liste_donnees[3].append(injections_completes)
+    #Dans le cas où la ligne concerne les injections de personnes entre 0 et 79 ans...
+    elif 4 <= age <= 79:
+        for i in range(len(liste_donnees_population)-1):
+            if age == int(liste_donnees_population[i+1][0])-1:
+                liste_donnees[i*2].append(primo_injections)
+                liste_donnees[i*2+1].append(injections_completes)
     
-    elif age == 11:
-        liste_donnees[4].append(primo_injections)
-        liste_donnees[5].append(injections_completes)
-
-    elif age == 17:
-        liste_donnees[6].append(primo_injections)
-        liste_donnees[7].append(injections_completes)
-    
-    elif age == 24:
-        liste_donnees[8].append(primo_injections)
-        liste_donnees[9].append(injections_completes)
-    
-    elif age == 29:
-        liste_donnees[10].append(primo_injections)
-        liste_donnees[11].append(injections_completes)    
-    
-    elif age == 39:
-        liste_donnees[12].append(primo_injections)
-        liste_donnees[13].append(injections_completes)
-    
-    elif age == 49:
-        liste_donnees[14].append(primo_injections)
-        liste_donnees[15].append(injections_completes)
-    
-    elif age == 59:
-        liste_donnees[16].append(primo_injections)
-        liste_donnees[17].append(injections_completes)
-    
-    elif age == 64:
-        liste_donnees[18].append(primo_injections)
-        liste_donnees[19].append(injections_completes)
-
-    elif age == 69:
-        liste_donnees[20].append(primo_injections)
-        liste_donnees[21].append(injections_completes)
-    
-    elif age == 74:
-        liste_donnees[22].append(primo_injections)
-        liste_donnees[23].append(injections_completes)
-    
-    elif age == 79:
-        liste_donnees[24].append(primo_injections)
-        liste_donnees[25].append(injections_completes)
-    
+    #Dans le cas où la ligne concerne les injections de personnes de plus de 80 ans...
     else:
         liste_donnees[26].append(primo_injections)
         liste_donnees[27].append(injections_completes)
 
 
 position_date_limite = len(liste_dates)-1                                       #Sauvegarde de la position du dernier jour dont on a les données
-dernier_jour = liste_dates[-1]
+dernier_jour = liste_dates[-1]                                                  #Sauvegarde le dernier jour dont on a les données
 
 
 #Début de la contruction du graphique
@@ -262,7 +223,7 @@ for courbe in liste_courbes:                                                    
     else: titre += " vaccinés"
     
     liste_titre.append(titre)
-    liste_couleur.append(courbe[3])
+    liste_couleur.append(courbe[4])
     liste_courbes[liste_courbes.index(courbe)] = courbe_finale
 
 
@@ -300,18 +261,21 @@ for i in range(len(liste_dates)): liste_dates[i] = liste_dates[i][8:11]+"/"+list
 
 liste_dates_reduite = ecartDate(reduction(liste_dates))                         #Réduit la liste de dates tout en conservant l'original
 
-#Trace les courbes continues (données factuelles) et pointillées (données prévisionnelles) pour chaque ensemble de données
+#Trace les courbes continues (données factuelles) et pointillées (données prévisionnelles)
+#pour chaque ensemble de données
 for i in range(len(liste_courbes)):
     plt.plot(liste_dates_reduite[:position_date_limite//limite_ecart_jour+1], ecartDate(reduction(projectionObjectif(liste_courbes[i])))[:position_date_limite//limite_ecart_jour+1], liste_couleur[i], label = liste_titre[i])
     plt.plot(liste_dates_reduite[position_date_limite//limite_ecart_jour:], ecartDate(reduction(projectionObjectif(liste_courbes[i])))[position_date_limite//limite_ecart_jour:], liste_couleur[i], linestyle = '--')
 
 
-#Trace une ligne de pointillé horizontale au niveau des 100% si le seuil d'immunité collective n'est pas égal à 0% ou 100% et affiche un texte sur le seuil actuel supposé
+#Trace une ligne de pointillé horizontale au niveau des 100% si le seuil d'immunité collective n'est pas égal à 0% ou 100%
+#et affiche un texte sur le seuil actuel supposé
 if 0 < seuil_immunite_collective < 100:
     plt.axhline(y = 100 * seuil_immunite_collective, color = 'black', linestyle = '--')
     plt.text(len(liste_dates_reduite)/2, 100 * seuil_immunite_collective + 1.2, f"Seuil d'immunité collective ({int(seuil_immunite_collective*100)}%)", horizontalalignment = 'center')
 
-#Trace une zone en gris clair délimitée par une ligne verticale en pointillé pour désigner les prédictions des courbes (si les données n'ont pas été raccourcies)
+#Trace une zone en gris clair délimitée par une ligne verticale en pointillé pour désigner les prédictions
+#des courbes (si les données n'ont pas été raccourcies)
 if empecher_valeurs_previsionnelles == False:
     plt.axvline(x = liste_dates_reduite[position_date_limite//limite_ecart_jour], color = 'gray', linestyle = '--')
     plt.axvspan(liste_dates_reduite[position_date_limite//limite_ecart_jour], liste_dates_reduite[-1], alpha = 0.5, color = 'lightgray')
