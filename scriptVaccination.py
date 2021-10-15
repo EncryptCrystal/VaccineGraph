@@ -22,8 +22,8 @@ lieuTelechargement = "Archives Données/"                                       
 #Liste des courbes demandées, en format (age minimal, age maximal, nb de doses, si la courbe doit obligatoirement aller jusqu'aux 100%, couleur du tracé)
 listeCourbes = [( 0, 80, 1, False, "red"),
                 ( 0, 80, 2, True, "brown"),
-                (12, 80, 1, False, "pink"),
-                (12, 80, 2, True, "purple"),
+                #(12, 80, 1, False, "pink"),
+                #(12, 80, 2, True, "purple"),
                 (60, 80, 1, False, "cyan"),
                 (60, 80, 2, False, "darkblue"),
                 (18, 59, 1, False, "yellow"),
