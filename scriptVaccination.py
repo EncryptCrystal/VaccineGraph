@@ -138,10 +138,13 @@ for ligne in lignes:
     ligne[0] = int(ligne[0])                                                    #Conversion de l'âge des vaccinés en nombre entier (de base une chaine de caractères)
     del ligne[2]                                                                #Suppression des primo-injections quotidiennes
     del ligne[2]                                                                #Suppression des injections complètes quotidiennes
+    del ligne[2]                                                                #Suppression des injections de rappel quotidiennes
     ligne[2] = int(ligne[2])                                                    #Conversion du cumul des primo-injections en nombre entier
     ligne[3] = int(ligne[3])                                                    #Conversion du cumul des injections complètes en nombre entier
-    del ligne[4]                                                                #Suppression du taux de primo-vaccinés en nombre entier
-    del ligne[4]                                                                #Suppression du taux de vaccinés en nombre entier
+    del ligne[4]                                                                #Suppression du cumul des injection de rappel
+    del ligne[4]                                                                #Suppression du taux de primo-vaccinés
+    del ligne[4]                                                                #Suppression du taux de vaccinés
+    del ligne[4]                                                                #Suppression du taux de rappel
     table.append(ligne)
     if ligne[1] == limiteDateDebut: limiteDateDebutExiste = True                #Limiter le nombre de dates si la limite existe dans le fichier
 fichier.close()                                                                 #Ferme le fichier
