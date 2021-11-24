@@ -108,11 +108,11 @@ lignes = str(urllib.request.urlopen("https://www.data.gouv.fr/fr/datasets/donnee
 fichier = open("fichierTemporaire.html", "w")
 
 for ligne in lignes:
-    if "vacsi-a-fra-" in ligne and "vacsi-a-fra-YYYY-MM-DD-HHhmm.csv" not in ligne:
+    if "vacsi12-fra-" in ligne:
         for i in range(len(ligne)-32):
             nomFichier = ligne[i:i+12]
-            if nomFichier == "vacsi-a-fra-":
-                nomFichier = ligne[i:i+32]
+            if nomFichier == "vacsi12-fra-":
+                nomFichier = "vacsi-a-fra-" + ligne[i+12:i+32]
                 break
 fichier.close()
 
