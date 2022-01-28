@@ -12,7 +12,7 @@ limiteDateFin = 0                                                               
 limiteNombreJour = 0                                                            #Indique le nombre de dates à inscrire sur l'axe des abscisses (0 ou 1 conserve la liste)
 limiteEcartJour = 14                                                            #Espace de n jours les dates (1 pour conserver la liste)
 nbJourPrediction = 7                                                            #Fait des prévisions sur les jours suivants à partir des n derniers jours
-seuilImmuniteCollective = 0.90                                                  #Définit le seuil d'immunité collective (trace une ligne honrizontale à ce pourcentage)
+seuilImmuniteCollective = 0                                                     #Définit le seuil d'immunité collective (trace une ligne honrizontale à ce pourcentage)
 yMin = 0                                                                        #Définit le pourcentage minimum affiché
 yMax = 100                                                                      #Définit le pourcentage maximum affiché
 
@@ -33,20 +33,20 @@ listeCourbes = [( 0, 80, 1, False, "red"),
 
 #Données sur la population en format (age minimal conserné, population de la tranche d'âge) (Insee, 2021)
 #(https://www.insee.fr/fr/outil-interactif/5367857/details/20_DEM/21_POP/21C_Figure3#)
-listeDonneesPopulation = [( 0, 3632671),
-                            ( 5, 4069407),
-                            (10, 1703491),
-                            (12, 5070658),
-                            (18, 5474811),
-                            (25, 3699017),
-                            (30, 8279647),
-                            (40, 8572773),
-                            (50, 8814162),
-                            (60, 4125693),
-                            (65, 3875034),
-                            (70, 3680309),
-                            (75, 2276900),
-                            (80, 4132668)]
+listeDonneesPopulation = [  ( 0, 3570743),
+                            ( 5, 4008669),
+                            (10, 1703214),
+                            (12, 5124913),
+                            (18, 5610876),
+                            (25, 3699678),
+                            (30, 8234477),
+                            (40, 8561785),
+                            (50, 8882961),
+                            (60, 4165483),
+                            (65, 3895934),
+                            (70, 3704374),
+                            (75, 2522324),
+                            (80, 4127965)]
 
 #Sert à limiter une liste à limiteNombreJour de manière uniforme
 def reduction(liste):
