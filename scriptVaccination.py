@@ -1,23 +1,34 @@
 #Imporations de divers modules
 from urllib import request
-import urllib.request
+from urllib.request import urlopen 
 from operator import itemgetter
 import matplotlib.pyplot as plt
 import numpy as np
 import os
+from os.path import basename
+
+#Paramètres des jeux de données
+lienTelechargementDonnees = "https://www.data.gouv.fr/fr/datasets/r/54dd5f8d-1e2e-4ccb-8fb8-eac68245befd"
+nomFichier = basename(urlopen(lienTelechargementDonnees).url)                   #Nom du jeu de données
+lieuTelechargement = "Archives Données/"                                        #Répertoire où sont entreposés les fichiers de données
+"""anneeTelechargement = nomFichier[12:17]
+moisTelechargement = nomFichier[17:19]
+jourTelechargement = nomFichier[22:17]
+heureTelechargement = nomFichier[12:17]"""
+
 
 #Paramètres du graphique
 limiteDateDebut = "2021-01-01"                                                  #Indique la première date des données (0 pour conserver la liste)
 limiteDateFin = 0                                                               #Exclure les données à partir d'une certaine date (0 pour conserver la liste)
 limiteNombreJour = 0                                                            #Indique le nombre de dates à inscrire sur l'axe des abscisses (0 ou 1 conserve la liste)
-limiteEcartJour = 14                                                            #Espace de n jours les dates (1 pour conserver la liste)
+limiteEcartJour = 112                                                           #Espace de n jours les dates (1 pour conserver la liste)
 nbJourPrediction = 7                                                            #Fait des prévisions sur les jours suivants à partir des n derniers jours
-seuilImmuniteCollective = 0                                                     #Définit le seuil d'immunité collective (trace une ligne honrizontale à ce pourcentage)
+seuilImmuniteCollective = 0                                                     #Définit le seuil d'immunité collective (trace une ligne horizontale à ce pourcentage)
+empecherValeursPrevisionnelles = False                                          #Par défaut, ne pas empêcher de tracer les valeurs prévisionnelles
+limiteDateDebutExiste = False                                                   #Par défaut, ne pas supprimer des dates sans vérifier que la limite de début existe
 yMin = 0                                                                        #Définit le pourcentage minimum affiché
 yMax = 100                                                                      #Définit le pourcentage maximum affiché
 
-#Paramètres du fichier de données
-lieuTelechargement = "Archives Données/"                                        #Répertoire où sont entreposés les fichiers de données
 
 #Liste des courbes demandées, en format (age minimal, age maximal, nb de doses, si la courbe doit obligatoirement aller jusqu'aux 100%, couleur du tracé)
 listeCourbes = [( 0, 80, 1, False, "red"),
@@ -31,7 +42,8 @@ listeCourbes = [( 0, 80, 1, False, "red"),
                 (12, 17, 1, False, "lawngreen"),
                 (12, 17, 2, False, "darkgreen")]
 
-#Données sur la population en format (age minimal conserné, population de la tranche d'âge) (Insee, 2021)
+
+#Données sur la population en format (age minimal concerné, population de la tranche d'âge) (Insee, 2021)
 #(https://www.insee.fr/fr/outil-interactif/5367857/details/20_DEM/21_POP/21C_Figure3#)
 listeDonneesPopulation = [  ( 0, 3570743),
                             ( 5, 4008669),
@@ -48,17 +60,19 @@ listeDonneesPopulation = [  ( 0, 3570743),
                             (75, 2522324),
                             (80, 4127965)]
 
+
 #Sert à limiter une liste à limiteNombreJour de manière uniforme
 def reduction(liste):
     if limiteNombreJour == 0 or limiteNombreJour == 1: return liste             #limiteNombreJour ne doit pas être égal à 0 ou 1 (risque d'erreur)
     listeCompressee = []
     coeff = len(liste)/(limiteNombreJour-1)                                     #Calcule l'écart idéal entre 2 éléments de la liste à compresser
-    listeCompressee.append(liste[0])                                            #Ajoute le premier élement de la liste à compresser
+    listeCompressee.append(liste[0])                                            #Ajoute le premier élément de la liste à compresser
     for i in range(len(liste)):
         if int(i/coeff) == len(listeCompressee):                                #Si la position de l'élément est supérieure ou égale à sa position dans la liste compressée
-            listeCompressee.append(liste[i-1])                                  #Alors ajouter l'élement à la liste compressée
-    listeCompressee.append(liste[-1])                                           #Ajoute le dernier élement de la liste dans la liste à compresser
+            listeCompressee.append(liste[i-1])                                  #Alors ajouter l'élément à la liste compressée
+    listeCompressee.append(liste[-1])                                           #Ajoute le dernier élément de la liste dans la liste à compresser
     return listeCompressee
+
 
 #Sert à la projection des courbes
 def projectionObjectif(liste):
@@ -66,12 +80,14 @@ def projectionObjectif(liste):
     while len(listeDates) != len(liste): liste.append(liste[-1]+coeff)          #Tant que la projection n'égale pas la date de fin, continuer la projection
     return liste
 
+
 #Sert à espacer les dates selon limiteEcartJour
 def ecartDate(liste):
     newListe = []
     for i in range(len(liste)):
         if i % limiteEcartJour == 0: newListe.append(liste[i])
     return newListe
+
 
 #Sert à séparer les nombres par milliers, millions...
 def formatNombre(nombre):
@@ -82,6 +98,7 @@ def formatNombre(nombre):
             nombre = nombre[:-i-j] + " " + nombre[-i-j:]
             j += 1
     return nombre
+
 
 #Analyse les courbes afin de définir s'il faut continuer d'allonger le graphique
 def analyseListeDonnees(listeDates, listeCourbes):
@@ -97,27 +114,9 @@ def analyseListeDonnees(listeDates, listeCourbes):
     
     return False
 
-#!!!
-def analyseLongueurCourbe(listeCourbes):
-    for i in range(len(listeCourbes)):
-        if True: None
-    return None
-
-#Sauvegarde temporairement le fichier de données
-lignes = str(urllib.request.urlopen("https://www.data.gouv.fr/fr/datasets/donnees-relatives-aux-personnes-vaccinees-contre-la-covid-19-1/").read()).strip("b'").split("\\n")
-fichier = open("fichierTemporaire.html", "w")
-
-for ligne in lignes:
-    if "vacsi12-fra-" in ligne:
-        for i in range(len(ligne)-32):
-            nomFichier = ligne[i:i+12]
-            if nomFichier == "vacsi12-fra-":
-                nomFichier = "vacsi-a-fra-" + ligne[i+12:i+32]
-                break
-fichier.close()
-
+#Si un graphique du même nom n'a pas encore été créé, alors télécharger le jeu de données
 if os.path.exists(lieuTelechargement+nomFichier) == False:
-    lignes = str(request.urlopen("https://www.data.gouv.fr/fr/datasets/r/54dd5f8d-1e2e-4ccb-8fb8-eac68245befd").read()).strip("b'").split("\\n")
+    lignes = str(request.urlopen(lienTelechargementDonnees).read()).strip("b'").split("\\n")
     fichier = open(lieuTelechargement+nomFichier, "w")
     for ligne in lignes: fichier.write(ligne + "\n")
     fichier.close()
@@ -128,14 +127,11 @@ ligneDescripteurs = fichier.readline().rstrip().rsplit(";")                     
 lignes = fichier.readlines()                                                    #Le reste est entreposée dans "lignes"
 table = []
 
-empecherValeursPrevisionnelles = False                                          #Par défaut, ne pas empêcher de tracer les valeurs prévisionnelles
-limiteDateDebutExiste = False                                                   #Par défaut, ne pas supprimer des dates sans vérifier que la limite de début existe
-
 for ligne in lignes:
     ligne = ligne.rstrip().split(";")
     if ligne[0] == "": break                                                    #Une ligne vide correspond à la fin du fichier csv : on sort de la boucle
     del ligne[0]                                                                #Supression des valeurs du pays de l'injection (toutes dans le fichier sont en France)
-    ligne[0] = int(ligne[0])                                                    #Conversion de l'âge des vaccinés en nombre entier (de base une chaine de caractères)
+    ligne[0] = int(ligne[0])                                                    #Conversion de l'âge des vaccinés en nombre entier (de base une chaîne de caractères)
     del ligne[2]                                                                #Suppression des primo-injections quotidiennes
     del ligne[2]                                                                #Suppression des injections complètes quotidiennes
     del ligne[2]                                                                #Suppression des injections de rappel quotidiennes
@@ -208,7 +204,7 @@ for courbe in listeCourbes:                                                     
         if courbe[0] <= listeDonneesPopulation[positionAge][0] < courbe[1] or listeDonneesPopulation[positionAge][0] == 80 == courbe[1]:
             populationConsernee += listeDonneesPopulation[positionAge][1]       #Ajouter la population sélectionnée au total de population consernée
             listeAge.append(listeDonneesPopulation[positionAge][0])             #Ajouter à la liste des âges utilisées le plus petit âge de l'ensemble des tranches d'âge demandées
-            for i in range(len(listeDonnees[0])):                               #Additionner les injections à la courbe totale, en prenant en compte la distanction primo-injection/injecction finale
+            for i in range(len(listeDonnees[0])):                               #Additionner les injections à la courbe totale, en prenant en compte la distinction primo-injection/injection finale
                 courbeFinale[i] += listeDonnees[positionAge*2+courbe[2]-1][i]
     
     #Les données passent du nombre d'injection au pourcentage de population
@@ -304,8 +300,6 @@ plt.xlabel(f"""Dates\n\nLes prévisions sont faites à partir des {formatNombre(
 Dernier jour de remontée des données : {dernierJour[8:]}/{dernierJour[5:7]}/{dernierJour[:4]}. Source des données sur Data.gouv et code du graphique disponible sur https://github.com/A2drien/VaccineGraph.""")
 plt.ylabel("Pourcentage de vaccinés (%)")
 
-#Sauvegarde l'image (avec la date des données dans les archives) et supprime les marges exterieures
+#Sauvegarde l'image (avec la date des données dans les archives) et supprime les marges extérieures
 plt.savefig(f"Objectifs Vaccination.png", bbox_inches = 'tight')
 plt.savefig(f"Archives Objectifs Vaccination/Objectifs Vaccination {nomFichier[12:22]}.png", bbox_inches = 'tight')
-
-os.remove("fichierTemporaire.html")
