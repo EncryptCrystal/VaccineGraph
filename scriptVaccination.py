@@ -12,7 +12,7 @@ limiteDateFin = 0                                                               
 limiteNombreJour = 0                                                            #Indique le nombre de dates à inscrire sur l'axe des abscisses (0 ou 1 conserve la liste)
 limiteEcartJour = 14                                                            #Espace de n jours les dates (1 pour conserver la liste)
 nbJourPrediction = 7                                                            #Fait des prévisions sur les jours suivants à partir des n derniers jours
-seuilImmuniteCollective = 0                                                     #Définit le seuil d'immunité collective (trace une ligne honrizontale à ce pourcentage)
+seuilImmuniteCollective = 0                                                     #Définit le seuil d'immunité collective (trace une ligne horizontale à ce pourcentage)
 yMin = 0                                                                        #Définit le pourcentage minimum affiché
 yMax = 100                                                                      #Définit le pourcentage maximum affiché
 
@@ -31,7 +31,7 @@ listeCourbes = [( 0, 80, 1, False, "red"),
                 (12, 17, 1, False, "lawngreen"),
                 (12, 17, 2, False, "darkgreen")]
 
-#Données sur la population en format (age minimal conserné, population de la tranche d'âge) (Insee, 2021)
+#Données sur la population en format (age minimal conserné, population de la tranche d'âge) (Insee, 2022)
 #(https://www.insee.fr/fr/outil-interactif/5367857/details/20_DEM/21_POP/21C_Figure3#)
 listeDonneesPopulation = [  ( 0, 3570743),
                             ( 5, 4008669),
@@ -115,6 +115,7 @@ for ligne in lignes:
                 nomFichier = "vacsi-a-fra-" + ligne[i+12:i+32]
                 break
 fichier.close()
+os.remove("fichierTemporaire.html")
 
 if os.path.exists(lieuTelechargement+nomFichier) == False:
     lignes = str(request.urlopen("https://www.data.gouv.fr/fr/datasets/r/54dd5f8d-1e2e-4ccb-8fb8-eac68245befd").read()).strip("b'").split("\\n")
@@ -125,6 +126,9 @@ if os.path.exists(lieuTelechargement+nomFichier) == False:
 #Début du script
 fichier = open(lieuTelechargement+nomFichier, "r")                              #Ouvre le fichier
 ligneDescripteurs = fichier.readline().rstrip().rsplit(";")                     #Sépare la première ligne (titres des colonnes) du reste des valeurs numériques
+
+nbDoses = int((len(ligneDescripteurs)-3)/3)                                     #Calcul le nombre de doses dans le fichier (2, 3, 4?)
+
 lignes = fichier.readlines()                                                    #Le reste est entreposée dans "lignes"
 table = []
 
@@ -135,44 +139,59 @@ for ligne in lignes:
     ligne = ligne.rstrip().split(";")
     if ligne[0] == "": break                                                    #Une ligne vide correspond à la fin du fichier csv : on sort de la boucle
     del ligne[0]                                                                #Supression des valeurs du pays de l'injection (toutes dans le fichier sont en France)
-    ligne[0] = int(ligne[0])                                                    #Conversion de l'âge des vaccinés en nombre entier (de base une chaine de caractères)
-    del ligne[2]                                                                #Suppression des primo-injections quotidiennes
-    del ligne[2]                                                                #Suppression des injections complètes quotidiennes
-    del ligne[2]                                                                #Suppression des injections de rappel quotidiennes
-    ligne[2] = int(ligne[2])                                                    #Conversion du cumul des primo-injections en nombre entier
-    ligne[3] = int(ligne[3])                                                    #Conversion du cumul des injections complètes en nombre entier
-    del ligne[4]                                                                #Suppression du cumul des injection de rappel
-    del ligne[4]                                                                #Suppression du taux de primo-vaccinés
-    del ligne[4]                                                                #Suppression du taux de vaccinés
-    del ligne[4]                                                                #Suppression du taux de rappel
+    ligne[0] = int(ligne[0])                                                    #Conversion de l'âge des vaccinés en nombre entier (de base une chaîne de caractères)
+    for i in range(nbDoses): del ligne[2]                                       #Suppression des injections quotidiennes
+    for idxDose in range(nbDoses): ligne[2+idxDose] = int(ligne[2+idxDose])     #Conversion du cumul des injections en nombre entier
+    for i in range(nbDoses): del ligne[5]                                       #Suppression des taux de vaccination
     table.append(ligne)
     if ligne[1] == limiteDateDebut: limiteDateDebutExiste = True                #Limiter le nombre de dates si la limite existe dans le fichier
 fichier.close()                                                                 #Ferme le fichier
 table = sorted(table, key=itemgetter(1, 0))                                     #Tri les données par date, puis par âge
 
+print(table)
+
 #Tant que la date limite de début n'est pas atteinte et si elle existe, continuer de supprimer les données
 while limiteDateDebutExiste and table[0][1] != limiteDateDebut: del table[0]
 
-#Vérifie la présense de données de données ultérieurs à la date limite de fin
+#Vérifie la présence de données de données ultérieurs à la date limite de fin
 for i in range(len(table)):
     if table[i][1] == limiteDateFin:                                            #Si c'est le cas...
         del table[i+15:]                                                        #Supprime ces données
-        empecherValeursPrevisionnelles = True                                   #Empeche la signalisation des valeurs prévisionelles (pas besoin)
+        empecherValeursPrevisionnelles = True                                   #Empêche la signalisation des valeurs prévisionelles (pas besoin)
         break                                                                   #Casse la boucle et empêche d'éventuelles erreurs
+
 
 #Initialisation des variables des dates et des 7 autres courbes
 listeDates = []                                                                 #Stocke la liste des dates en abscisse
 listeDonnees = []                                                               #Stocke la liste des données par jour et par âge
 
-for i in range(28): listeDonnees.append([])                                     #Ajout de listes vides sur lesquelles ajouter les données par âge
+for i in range(len(listeDonneesPopulation)):
+    listeDonnees.append([])
+    for y in range(nbDoses):
+        listeDonnees[i].append([])
 
+
+table = sorted(table, key=itemgetter(0, 1))                                     #Tri les données par âge, puis par date
+
+#!!! penser à faire la liste des dates
+
+#Pour autant qu'il y a d'âges différents dans les données (14) :
+for trancheAge in range(len(listeDonneesPopulation)):
+    listeDosesParAge = []
+    for trancheDate in range(len(table)/len(listeDonneesPopulation)):
+        listeDosesParAge.append(table[trancheAge*len(listeDonneesPopulation)+trancheDate][2:-1])
+
+
+"""
 #Répartit les données dans les différentes listes
 for donnees in table:
-    #Afin de faciliter la compréhension du code, les 4 colonnes sont assignés à des variables
+
+    #Afin de faciliter la compréhension du code, les différentes colonnes sont assignées à des variables
     age = donnees[0]
     date = donnees[1]
-    primoInjections = donnees[2]
-    injectionsCompletes = donnees[3]
+    listeInjections = []
+    for idxDose in range(nbDoses):
+        listeInjections.append(donnees[2+idxDose])
 
     #Dans le cas où la ligne concerne les injections tout âge confondu...
     if age == 0:
@@ -180,16 +199,16 @@ for donnees in table:
     
     #Dans le cas où la ligne concerne les injections de personnes entre 0 et 79 ans...
     elif 4 <= age <= 79:
-        for i in range(len(listeDonneesPopulation)-1):
-            if age == int(listeDonneesPopulation[i+1][0])-1:
-                listeDonnees[i*2].append(primoInjections)
-                listeDonnees[i*2+1].append(injectionsCompletes)
+        for idxAge in range(len(listeDonneesPopulation)-1):
+            if age == listeDonneesPopulation[idxAge+1][0]-1:
+                for idxDose in range(nbDoses):
+                    listeDonnees[idxAge][idxDose].append(listeInjections[idxDose])
     
     #Dans le cas où la ligne concerne les injections de personnes de plus de 80 ans...
     else:
-        listeDonnees[26].append(primoInjections)
-        listeDonnees[27].append(injectionsCompletes)
-
+        for idxDose in range(nbDoses):
+            listeDonnees[len(listeDonneesPopulation)-1].append(listeInjections[idxDose])
+"""
 
 positionDateLimite = len(listeDates)-1                                          #Sauvegarde de la position du dernier jour dont on a les données
 dernierJour = listeDates[-1]                                                    #Sauvegarde le dernier jour dont on a les données
@@ -204,11 +223,14 @@ for courbe in listeCourbes:                                                     
     courbeFinale = [0]*len(listeDonnees[0])                                     #Contient le nombre final d'injection pour l'ensemble des tranches d'âge demandées
     populationConsernee = 0                                                     #Variable contenant la population totale consernée par la courbe actuelle
     listeAge = []                                                               #Contient les différentes tranches d'âge de l'ensemble des tranches d'âge demandées
+
     for positionAge in range(len(listeDonneesPopulation)):                      #On balaye la liste de données de population pour savoir si l'âge appartient à l'ensemble des tranches d'âge demandées, et si c'est le cas :
         if courbe[0] <= listeDonneesPopulation[positionAge][0] < courbe[1] or listeDonneesPopulation[positionAge][0] == 80 == courbe[1]:
             populationConsernee += listeDonneesPopulation[positionAge][1]       #Ajouter la population sélectionnée au total de population consernée
             listeAge.append(listeDonneesPopulation[positionAge][0])             #Ajouter à la liste des âges utilisées le plus petit âge de l'ensemble des tranches d'âge demandées
-            for i in range(len(listeDonnees[0])):                               #Additionner les injections à la courbe totale, en prenant en compte la distanction primo-injection/injecction finale
+
+            for i in range(len(listeDonnees[0])):                               #Additionner les injections à la courbe totale
+                print(listeDonnees[positionAge*2+courbe[2]-1][i])
                 courbeFinale[i] += listeDonnees[positionAge*2+courbe[2]-1][i]
     
     #Les données passent du nombre d'injection au pourcentage de population
@@ -300,12 +322,10 @@ plt.margins(0, 0)                                                               
 
 #Défini les titres du graphe et des axes x et y, et ajoute des notes en bas du graphe
 plt.title(f"Avancement de la vaccination (données du {nomFichier[20:22]}/{nomFichier[17:19]}/{nomFichier[12:16]})")
-plt.xlabel(f"""Dates\n\nLes prévisions sont faites à partir des {formatNombre(nbJourPrediction)} jours précédents. En considérant une répartition de la population égale à celle indiquée par l'Insee en 2021.
+plt.xlabel(f"""Dates\n\nLes prévisions sont faites à partir des {formatNombre(nbJourPrediction)} jours précédents. En considérant une répartition de la population égale à celle indiquée par l'Insee en 2022.
 Dernier jour de remontée des données : {dernierJour[8:]}/{dernierJour[5:7]}/{dernierJour[:4]}. Source des données sur Data.gouv et code du graphique disponible sur https://github.com/A2drien/VaccineGraph.""")
 plt.ylabel("Pourcentage de vaccinés (%)")
 
 #Sauvegarde l'image (avec la date des données dans les archives) et supprime les marges exterieures
 plt.savefig(f"Objectifs Vaccination.png", bbox_inches = 'tight')
 plt.savefig(f"Archives Objectifs Vaccination/Objectifs Vaccination {nomFichier[12:22]}.png", bbox_inches = 'tight')
-
-os.remove("fichierTemporaire.html")
