@@ -300,6 +300,8 @@ plt.xlabel(f"""Dates\n\nLes prévisions sont faites à partir des {formatNombre(
 Dernier jour de remontée des données : {dernierJour[8:]}/{dernierJour[5:7]}/{dernierJour[:4]}. Source des données sur Data.gouv et code du graphique disponible sur https://github.com/A2drien/VaccineGraph.""")
 plt.ylabel("Pourcentage de vaccinés (%)")
 
+#Arret des images, la segonde dose de rappel crée des bugs
+
 #Sauvegarde l'image (avec la date des données dans les archives) et supprime les marges extérieures
-plt.savefig(f"Objectifs Vaccination.png", bbox_inches = 'tight')
-plt.savefig(f"Archives Objectifs Vaccination/Objectifs Vaccination {nomFichier[12:22]}.png", bbox_inches = 'tight')
+#plt.savefig(f"Objectifs Vaccination.png", bbox_inches = 'tight')
+#plt.savefig(f"Archives Objectifs Vaccination/Objectifs Vaccination {nomFichier[12:22]}.png", bbox_inches = 'tight')
